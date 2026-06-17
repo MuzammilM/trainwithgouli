@@ -36,7 +36,10 @@ create trigger on_auth_user_created
 -- Auth hook: inject role into JWT access token.
 create or replace function public.custom_access_token_hook(event jsonb)
 returns jsonb
-language plpgsql stable
+language plpgsql
+stable
+security definer
+set search_path = ''
 as $$
 declare
   claims jsonb;
@@ -115,6 +118,7 @@ create table public.workout_sets (
 create index idx_exercises_created_by on public.exercises(created_by);
 create index idx_workout_plans_created_by on public.workout_plans(created_by);
 create index idx_plan_exercises_plan_id on public.plan_exercises(plan_id);
+create index idx_plan_exercises_exercise_id on public.plan_exercises(exercise_id);
 create index idx_workout_days_user_id_date on public.workout_days(user_id, date desc);
 create index idx_workout_sets_day_exercise on public.workout_sets(workout_day_id, exercise_id);
 create index idx_workout_sets_exercise_user on public.workout_sets(exercise_id, created_at desc);
@@ -127,13 +131,20 @@ as $$
   select (auth.jwt() ->> 'user_role') = 'admin';
 $$;
 
--- Enable RLS on all public tables.
+-- Enable and force RLS on all public tables.
 alter table public.profiles enable row level security;
 alter table public.exercises enable row level security;
 alter table public.workout_plans enable row level security;
 alter table public.plan_exercises enable row level security;
 alter table public.workout_days enable row level security;
 alter table public.workout_sets enable row level security;
+
+alter table public.profiles force row level security;
+alter table public.exercises force row level security;
+alter table public.workout_plans force row level security;
+alter table public.plan_exercises force row level security;
+alter table public.workout_days force row level security;
+alter table public.workout_sets force row level security;
 
 -- Grant base privileges to authenticated users.
 grant select, update on public.profiles to authenticated;
@@ -143,22 +154,41 @@ grant select, insert, update, delete on public.plan_exercises to authenticated;
 grant select, insert, update, delete on public.workout_days to authenticated;
 grant select, insert, update, delete on public.workout_sets to authenticated;
 
+-- Service-role policies: backend services and admin jobs need full access.
+create policy "service_role_all_profiles"
+  on public.profiles for all to service_role using (true) with check (true);
+
+create policy "service_role_all_exercises"
+  on public.exercises for all to service_role using (true) with check (true);
+
+create policy "service_role_all_workout_plans"
+  on public.workout_plans for all to service_role using (true) with check (true);
+
+create policy "service_role_all_plan_exercises"
+  on public.plan_exercises for all to service_role using (true) with check (true);
+
+create policy "service_role_all_workout_days"
+  on public.workout_days for all to service_role using (true) with check (true);
+
+create policy "service_role_all_workout_sets"
+  on public.workout_sets for all to service_role using (true) with check (true);
+
 -- Profiles policies.
 create policy "profiles_select"
   on public.profiles
   for select
   to authenticated
   using (
-    (select auth.uid()) = id
-    or (select public.is_admin())
+    auth.uid() = id
+    or public.is_admin()
   );
 
 create policy "profiles_update"
   on public.profiles
   for update
   to authenticated
-  using ((select auth.uid()) = id)
-  with check ((select auth.uid()) = id);
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 -- Exercises: readable by all authenticated users; editable by owner or admin.
 create policy "exercises_select"
@@ -171,19 +201,19 @@ create policy "exercises_insert"
   on public.exercises
   for insert
   to authenticated
-  with check ((select auth.uid()) = created_by);
+  with check (auth.uid() = created_by);
 
 create policy "exercises_update"
   on public.exercises
   for update
   to authenticated
   using (
-    created_by = (select auth.uid())
-    or (select public.is_admin())
+    created_by = auth.uid()
+    or public.is_admin()
   )
   with check (
-    created_by = (select auth.uid())
-    or (select public.is_admin())
+    created_by = auth.uid()
+    or public.is_admin()
   );
 
 create policy "exercises_delete"
@@ -191,8 +221,8 @@ create policy "exercises_delete"
   for delete
   to authenticated
   using (
-    created_by = (select auth.uid())
-    or (select public.is_admin())
+    created_by = auth.uid()
+    or public.is_admin()
   );
 
 -- Workout plans: readable by all authenticated users; editable by owner or admin.
@@ -206,19 +236,19 @@ create policy "workout_plans_insert"
   on public.workout_plans
   for insert
   to authenticated
-  with check ((select auth.uid()) = created_by);
+  with check (auth.uid() = created_by);
 
 create policy "workout_plans_update"
   on public.workout_plans
   for update
   to authenticated
   using (
-    created_by = (select auth.uid())
-    or (select public.is_admin())
+    created_by = auth.uid()
+    or public.is_admin()
   )
   with check (
-    created_by = (select auth.uid())
-    or (select public.is_admin())
+    created_by = auth.uid()
+    or public.is_admin()
   );
 
 create policy "workout_plans_delete"
@@ -226,8 +256,8 @@ create policy "workout_plans_delete"
   for delete
   to authenticated
   using (
-    created_by = (select auth.uid())
-    or (select public.is_admin())
+    created_by = auth.uid()
+    or public.is_admin()
   );
 
 -- Plan exercises: cascade via plan ownership.
@@ -245,7 +275,7 @@ create policy "plan_exercises_insert"
     exists (
       select 1 from public.workout_plans
       where id = plan_exercises.plan_id
-        and (created_by = (select auth.uid()) or (select public.is_admin()))
+        and (created_by = auth.uid() or public.is_admin())
     )
   );
 
@@ -257,14 +287,14 @@ create policy "plan_exercises_update"
     exists (
       select 1 from public.workout_plans
       where id = plan_exercises.plan_id
-        and (created_by = (select auth.uid()) or (select public.is_admin()))
+        and (created_by = auth.uid() or public.is_admin())
     )
   )
   with check (
     exists (
       select 1 from public.workout_plans
       where id = plan_exercises.plan_id
-        and (created_by = (select auth.uid()) or (select public.is_admin()))
+        and (created_by = auth.uid() or public.is_admin())
     )
   );
 
@@ -276,7 +306,7 @@ create policy "plan_exercises_delete"
     exists (
       select 1 from public.workout_plans
       where id = plan_exercises.plan_id
-        and (created_by = (select auth.uid()) or (select public.is_admin()))
+        and (created_by = auth.uid() or public.is_admin())
     )
   );
 
@@ -291,19 +321,19 @@ create policy "workout_days_insert"
   on public.workout_days
   for insert
   to authenticated
-  with check ((select auth.uid()) = user_id);
+  with check (auth.uid() = user_id);
 
 create policy "workout_days_update"
   on public.workout_days
   for update
   to authenticated
   using (
-    user_id = (select auth.uid())
-    or (select public.is_admin())
+    user_id = auth.uid()
+    or public.is_admin()
   )
   with check (
-    user_id = (select auth.uid())
-    or (select public.is_admin())
+    user_id = auth.uid()
+    or public.is_admin()
   );
 
 create policy "workout_days_delete"
@@ -311,8 +341,8 @@ create policy "workout_days_delete"
   for delete
   to authenticated
   using (
-    user_id = (select auth.uid())
-    or (select public.is_admin())
+    user_id = auth.uid()
+    or public.is_admin()
   );
 
 -- Workout sets: editable by owner of the parent day or admin.
@@ -330,7 +360,7 @@ create policy "workout_sets_insert"
     exists (
       select 1 from public.workout_days
       where id = workout_sets.workout_day_id
-        and (user_id = (select auth.uid()) or (select public.is_admin()))
+        and (user_id = auth.uid() or public.is_admin())
     )
   );
 
@@ -342,14 +372,14 @@ create policy "workout_sets_update"
     exists (
       select 1 from public.workout_days
       where id = workout_sets.workout_day_id
-        and (user_id = (select auth.uid()) or (select public.is_admin()))
+        and (user_id = auth.uid() or public.is_admin())
     )
   )
   with check (
     exists (
       select 1 from public.workout_days
       where id = workout_sets.workout_day_id
-        and (user_id = (select auth.uid()) or (select public.is_admin()))
+        and (user_id = auth.uid() or public.is_admin())
     )
   );
 
@@ -361,7 +391,7 @@ create policy "workout_sets_delete"
     exists (
       select 1 from public.workout_days
       where id = workout_sets.workout_day_id
-        and (user_id = (select auth.uid()) or (select public.is_admin()))
+        and (user_id = auth.uid() or public.is_admin())
     )
   );
 
@@ -383,3 +413,66 @@ $$;
 create trigger on_profile_created_set_first_admin
   after insert on public.profiles
   for each row execute function public.handle_first_user_admin();
+
+-- Auto-update updated_at on application tables.
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger set_updated_at
+  before update on public.profiles
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at
+  before update on public.exercises
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at
+  before update on public.workout_plans
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at
+  before update on public.plan_exercises
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at
+  before update on public.workout_days
+  for each row execute function public.set_updated_at();
+
+create trigger set_updated_at
+  before update on public.workout_sets
+  for each row execute function public.set_updated_at();
+
+-- DOWN migration: reverse the UP section in dependency order.
+drop trigger if exists set_updated_at on public.workout_sets;
+drop trigger if exists set_updated_at on public.workout_days;
+drop trigger if exists set_updated_at on public.plan_exercises;
+drop trigger if exists set_updated_at on public.workout_plans;
+drop trigger if exists set_updated_at on public.exercises;
+drop trigger if exists set_updated_at on public.profiles;
+
+drop trigger if exists on_profile_created_set_first_admin on public.profiles;
+drop trigger if exists on_auth_user_created on auth.users;
+
+drop function if exists public.set_updated_at();
+drop function if exists public.handle_first_user_admin();
+drop function if exists public.is_admin();
+drop function if exists public.custom_access_token_hook(jsonb);
+drop function if exists public.handle_new_user();
+
+drop table if exists public.workout_sets cascade;
+drop table if exists public.workout_days cascade;
+drop table if exists public.plan_exercises cascade;
+drop table if exists public.workout_plans cascade;
+drop table if exists public.exercises cascade;
+drop table if exists public.profiles cascade;
+
+drop type if exists public.app_role cascade;
