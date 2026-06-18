@@ -115,6 +115,8 @@ create table public.workout_sets (
 );
 
 -- Indexes for RLS and weight-nudge queries.
+-- CONCURRENTLY is omitted because this is an initial schema migration run against empty tables.
+-- All future migrations that add indexes to populated tables should use CREATE INDEX CONCURRENTLY.
 create index idx_exercises_created_by on public.exercises(created_by);
 create index idx_workout_plans_created_by on public.workout_plans(created_by);
 create index idx_plan_exercises_plan_id on public.plan_exercises(plan_id);
@@ -127,6 +129,7 @@ create index idx_workout_sets_exercise_user on public.workout_sets(exercise_id, 
 create or replace function public.is_admin()
 returns boolean
 language sql stable
+set search_path = ''
 as $$
   select (auth.jwt() ->> 'user_role') = 'admin';
 $$;
@@ -174,6 +177,8 @@ create policy "service_role_all_workout_sets"
   on public.workout_sets for all to service_role using (true) with check (true);
 
 -- Profiles policies.
+-- INSERT and DELETE are intentionally omitted: profiles are created automatically by the
+-- auth.users trigger (handle_new_user), and users are not allowed to self-delete profiles.
 create policy "profiles_select"
   on public.profiles
   for select
@@ -310,7 +315,8 @@ create policy "plan_exercises_delete"
     )
   );
 
--- Workout days: readable by all authenticated users; editable by owner or admin.
+-- Workout days: intentionally readable by all authenticated users so users can see each other's workouts.
+-- Insert is restricted to the authenticated user; update/delete restricted to owner or admin.
 create policy "workout_days_select"
   on public.workout_days
   for select
@@ -345,7 +351,8 @@ create policy "workout_days_delete"
     or public.is_admin()
   );
 
--- Workout sets: editable by owner of the parent day or admin.
+-- Workout sets: intentionally readable by all authenticated users so users can see each other's workout details.
+-- Insert/update/delete restricted to owner of the parent day or admin.
 create policy "workout_sets_select"
   on public.workout_sets
   for select
@@ -396,14 +403,16 @@ create policy "workout_sets_delete"
   );
 
 -- Promote the very first signed-up user to admin.
--- This trigger runs on every new auth user; if no profiles exist yet, the new user becomes admin.
+-- This trigger runs after a new profile is inserted. If no other profiles exist,
+-- the new user is promoted to admin. The condition uses id <> new.id so the
+-- check remains safe even if the new row is visible within the trigger.
 create or replace function public.handle_first_user_admin()
 returns trigger
 language plpgsql
 security definer set search_path = ''
 as $$
 begin
-  if not exists (select 1 from public.profiles) then
+  if (select count(*) from public.profiles where id <> new.id) = 0 then
     update public.profiles set role = 'admin' where id = new.id;
   end if;
   return new;
@@ -451,28 +460,7 @@ create trigger set_updated_at
   before update on public.workout_sets
   for each row execute function public.set_updated_at();
 
--- DOWN migration: reverse the UP section in dependency order.
-drop trigger if exists set_updated_at on public.workout_sets;
-drop trigger if exists set_updated_at on public.workout_days;
-drop trigger if exists set_updated_at on public.plan_exercises;
-drop trigger if exists set_updated_at on public.workout_plans;
-drop trigger if exists set_updated_at on public.exercises;
-drop trigger if exists set_updated_at on public.profiles;
-
-drop trigger if exists on_profile_created_set_first_admin on public.profiles;
-drop trigger if exists on_auth_user_created on auth.users;
-
-drop function if exists public.set_updated_at();
-drop function if exists public.handle_first_user_admin();
-drop function if exists public.is_admin();
-drop function if exists public.custom_access_token_hook(jsonb);
-drop function if exists public.handle_new_user();
-
-drop table if exists public.workout_sets cascade;
-drop table if exists public.workout_days cascade;
-drop table if exists public.plan_exercises cascade;
-drop table if exists public.workout_plans cascade;
-drop table if exists public.exercises cascade;
-drop table if exists public.profiles cascade;
-
-drop type if exists public.app_role cascade;
+-- Harden trigger functions: do not allow direct execution by client-facing roles.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+revoke execute on function public.handle_first_user_admin() from public, anon, authenticated;
+revoke execute on function public.set_updated_at() from public, anon, authenticated;
