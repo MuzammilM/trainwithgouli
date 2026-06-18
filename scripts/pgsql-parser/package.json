@@ -1,0 +1,16 @@
+{
+  "name": "trainwithgouli-pgsql-parser",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI utility to parse TrainWithGouli Supabase migration files and report syntax errors.",
+  "main": "index.js",
+  "bin": {
+    "trainwithgouli-pgsql-parser": "./index.js"
+  },
+  "scripts": {
+    "parse": "node index.js"
+  },
+  "dependencies": {
+    "pgsql-parser": "^13.16.0"
+  }
+}

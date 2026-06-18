@@ -1,0 +1,22 @@
+---
+# Dev server inventory
+all:
+  children:
+    dev:
+      hosts:
+        dev-01:
+          ansible_host: dev
+          ansible_user: mz
+          ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+      vars:
+        env: dev
+        domain: server01.taild68ded.ts.net
+        cert_type: tailscale
+        deploy_dir: /opt/trainwithgouli
+        certs_dir: "{{ deploy_dir }}/certs"
+        app_name: trainwithgouli
+        dockerhub_username: "{{ vault_dockerhub_username | default('') }}"
+        dockerhub_token: "{{ vault_dockerhub_token | default('') }}"
+        supabase_url: "{{ vault_supabase_url | default('') }}"
+        supabase_service_role_key: "{{ vault_supabase_service_role_key | default('') }}"
+        owner_api_key: "{{ vault_owner_api_key | default('change-me') }}"

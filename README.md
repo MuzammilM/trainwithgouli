@@ -22,7 +22,7 @@ TrainWithGouli helps users log workouts, build exercise plans, and track progres
 - @supabase/ssr cookie-based auth
 - Supabase Postgres + RLS
 
-## Getting started
+## Development setup
 
 ```bash
 cd frontend/next
@@ -35,3 +35,58 @@ npm run dev
 Apply the Supabase migration in `supabase/migrations/0001_trainwithgouli_init.sql` to your project.
 
 The first user to sign up is automatically promoted to `admin` via the `handle_first_user_admin` trigger.
+
+## Build the frontend Docker image
+
+```bash
+./scripts/frontend/next/build-docker.sh
+```
+
+Push the image to Docker Hub:
+
+```bash
+./scripts/frontend/next/build-docker.sh --push
+```
+
+## Deploy
+
+Top-level deployment wrapper:
+
+```bash
+# Deploy frontend to dev
+./deploy/deploy.sh frontend dev
+
+# Deploy frontend to production
+./deploy/deploy.sh frontend prod
+```
+
+Individual deploy scripts:
+
+```bash
+./deploy/frontend/next/deploy-dev.sh
+./deploy/frontend/next/deploy-prod.sh
+```
+
+Rollback:
+
+```bash
+./deploy/frontend/next/rollback.sh [version]
+```
+
+## Validate Supabase migrations
+
+```bash
+cd scripts/pgsql-parser
+npm install
+node index.js ../../supabase/migrations/0001_trainwithgouli_init.sql
+```
+
+## Project structure
+
+```
+frontend/next/          Next.js application
+supabase/migrations/    Database migrations
+deploy/                 Docker Compose, nginx, and deploy scripts
+infra/ansible/          Ansible playbooks and inventory
+scripts/                Development and build utilities
+```

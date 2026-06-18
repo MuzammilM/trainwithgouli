@@ -1,0 +1,9 @@
+---
+# Production vault variables
+# Encrypt this file with: ansible-vault encrypt infra/ansible/group_vars/production/vault.yml
+
+vault_dockerhub_username: "REPLACE_ME"
+vault_dockerhub_token: "REPLACE_ME"
+vault_supabase_url: "REPLACE_ME"
+vault_supabase_service_role_key: "REPLACE_ME"
+vault_owner_api_key: "REPLACE_ME"

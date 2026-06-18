@@ -1,0 +1,17 @@
+[Unit]
+Description=TrainWithGouli Podman Compose Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/trainwithgouli
+EnvironmentFile=/opt/trainwithgouli/deploy.env
+ExecStart=podman-compose -f /opt/trainwithgouli/docker-compose.yml up -d
+ExecStop=podman-compose -f /opt/trainwithgouli/docker-compose.yml down
+RemainAfterExit=yes
+User=mz
+Group=mz
+
+[Install]
+WantedBy=default.target

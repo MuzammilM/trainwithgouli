@@ -1,4 +1,19 @@
 services:
+  frontend-next:
+    image: docker.io/muzammilmomin/trainwithgouli:frontend-v${VERSION}
+    container_name: trainwithgouli-frontend-next
+    expose:
+      - "3000"
+    networks:
+      - trainwithgouli
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
   static:
     image: docker.io/muzammilmomin/trainwithgouli:frontend-static-${VERSION}
     container_name: trainwithgouli-static
@@ -32,6 +47,14 @@ services:
       timeout: 5s
       start_period: 5s
       retries: 3
+
+# Podman secrets for sensitive values.
+# The frontend Next.js container only needs public Supabase values at build time,
+# so no secrets are mounted here. These secrets are reserved for future backend
+# services that need direct database access.
+secrets:
+  supabase_service_role_key:
+    external: true
 
 networks:
   trainwithgouli:

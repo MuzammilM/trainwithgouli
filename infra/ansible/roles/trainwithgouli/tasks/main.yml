@@ -1,0 +1,94 @@
+---
+# TrainWithGouli deployment tasks
+# Deploys the Next.js frontend container with podman-compose
+
+- name: Ensure deployment directory exists
+  file:
+    path: "{{ deploy_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Ensure certs directory exists
+  file:
+    path: "{{ certs_dir }}"
+    state: directory
+    mode: '0755'
+
+# Certificates
+- name: Check if Tailscale certificates exist
+  stat:
+    path: "/var/lib/tailscale/certs/{{ domain }}.crt"
+  register: tailscale_cert
+  become: yes
+  when: cert_type == "tailscale"
+
+- name: Copy Tailscale certificates
+  copy:
+    src: "/var/lib/tailscale/certs/{{ domain }}.{{ item }}"
+    dest: "{{ certs_dir }}/{{ domain }}.{{ item }}"
+    remote_src: yes
+    mode: '0644'
+  with_items:
+    - crt
+    - key
+  become: yes
+  when: cert_type == "tailscale" and tailscale_cert.stat.exists
+
+- name: Install certbot
+  package:
+    name: certbot
+    state: present
+  become: yes
+  when: cert_type == "letsencrypt"
+
+- name: Generate Let's Encrypt certificates
+  shell: |
+    certbot certonly --standalone \
+      -d {{ domain }} \
+      --agree-tos \
+      --non-interactive \
+      --email admin@{{ domain }} \
+      --keep-until-expiring
+  args:
+    executable: /bin/bash
+  when: cert_type == "letsencrypt"
+
+- name: Copy Let's Encrypt certificates
+  shell: |
+    cp /etc/letsencrypt/live/{{ domain }}/fullchain.pem {{ certs_dir }}/{{ domain }}.crt
+    cp /etc/letsencrypt/live/{{ domain }}/privkey.pem {{ certs_dir }}/{{ domain }}.key
+  args:
+    executable: /bin/bash
+  when: cert_type == "letsencrypt"
+
+- name: Copy docker-compose file
+  copy:
+    src: "{{ playbook_dir }}/../../deploy/docker-compose.yml"
+    dest: "{{ deploy_dir }}/docker-compose.yml"
+    mode: '0644'
+
+- name: Copy nginx proxy config
+  copy:
+    src: "{{ playbook_dir }}/../../deploy/nginx-proxy.conf"
+    dest: "{{ deploy_dir }}/nginx-proxy.conf"
+    mode: '0644'
+
+- name: Pull frontend image
+  shell: |
+    podman pull {{ frontend_image }}
+  args:
+    executable: /bin/bash
+
+- name: Pull nginx image
+  shell: |
+    podman pull {{ nginx_image }}
+  args:
+    executable: /bin/bash
+
+- name: Start containers with podman-compose
+  shell: |
+    cd {{ deploy_dir }}
+    VERSION={{ deploy_version }} podman-compose up -d
+  args:
+    executable: /bin/bash
+  register: compose_up
