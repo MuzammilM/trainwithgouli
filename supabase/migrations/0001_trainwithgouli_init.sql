@@ -87,6 +87,8 @@ create table public.plan_exercises (
   sets int,
   reps int,
   rest_seconds int,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
   unique (plan_id, exercise_id)
 );
 
