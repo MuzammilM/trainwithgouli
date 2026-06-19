@@ -1,0 +1,39 @@
+services:
+  static:
+    image: docker.io/muzammilmomin/trainwithgouli:frontend-static-${VERSION}
+    container_name: trainwithgouli-static
+    env_file:
+      - .env
+    expose:
+      - "8080"
+    networks:
+      - trainwithgouli
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
+
+  backend:
+    image: docker.io/muzammilmomin/trainwithgouli:backend-${VERSION}
+    container_name: trainwithgouli-backend
+    env_file:
+      - .env
+    expose:
+      - "8080"
+    networks:
+      - trainwithgouli
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
+
+networks:
+  trainwithgouli:
+    name: trainwithgouli
+    external: true
