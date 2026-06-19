@@ -5,6 +5,4 @@ const VERSION_HISTORY = [
   { version: '0.1.0', date: '2026-06-17', description: 'Initial TrainWithGouli workout tracker release' },
 ]
 
-if (typeof module !== 'undefined') {
-  module.exports = { VERSION, VERSION_HISTORY }
-}
+module.exports = { VERSION, VERSION_HISTORY }

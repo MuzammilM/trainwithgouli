@@ -96,7 +96,8 @@ if [ ! -f "$VERSION_FILE" ]; then
     exit 1
 fi
 
-CURRENT_VERSION=$(node -e "const v=require('${VERSION_FILE}'); console.log(v.VERSION)")
+# Extract current version using grep/sed for compatibility with Node ESM/CJS
+CURRENT_VERSION=$(grep -oE "VERSION = '[0-9]+\.[0-9]+\.[0-9]+'" "$VERSION_FILE" | sed "s/VERSION = '//;s/'$//")
 
 if [ -z "$CURRENT_VERSION" ]; then
     echo -e "${RED}Error: Could not extract VERSION from $VERSION_FILE${NC}"
