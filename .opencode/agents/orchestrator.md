@@ -12,7 +12,7 @@ vibe: Coordinates subagents in sequence with intelligent model switching and app
 # Orchestrator Agent
 
 > **Harness**: [Opencode](https://opencode.ai)  
-> **Working Directory**: `~/workspace`
+> **Working Directory**: `~/workspace/trainwithgouli`
 
 Coordinates subagents in sequence with approval checkpoints, intelligent model switching, and context management via basic-memory.
 
@@ -36,7 +36,7 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 The workspace uses a monorepo layout:
 
 ```
-~/workspace/
+~/workspace/trainwithgouli/
 ├── frontend/
 │   ├── static/          # Static HTML/CSS/JS site
 │   │   ├── index.html
@@ -47,19 +47,14 @@ The workspace uses a monorepo layout:
 │       ├── app/
 │       ├── components/
 │       └── package.json
-├── backend/             # Rust backend (placeholder)
-├── deploy/
-│   ├── deploy.sh        # Wrapper: ./deploy.sh [component] [env]
+├── backend/             # Go backend services
+├── deploy/              # Per-component deploy scripts and docker-compose
+│   ├── deploy.sh
 │   ├── frontend/
 │   │   ├── static/
-│   │   │   ├── deploy-dev.sh
-│   │   │   └── deploy-prod.sh
 │   │   └── next/
-│   │       ├── deploy-dev.sh (placeholder)
-│   │       └── deploy-prod.sh (placeholder)
 │   └── backend/
-│       ├── deploy-dev.sh (placeholder)
-│       └── deploy-prod.sh (placeholder)
+├── infra/               # Ansible playbooks and inventory
 ├── supabase/            # DB migrations (shared)
 ├── docs/                # Documentation
 └── scripts/             # Dev tooling
@@ -83,17 +78,19 @@ The application is hosted on two remote servers accessible via SSH aliases:
 - **Purpose**: Development and staging environment
 - **Applications**: Hosts containerized applications including ManakeeshHub and TrainWithGouli (dev/staging) and other testing projects
 - **Container Runtime**: Podman (rootless containers)
-- **URL**: https://manakeeshhub.mzm.co.in (shared nginx gateway, Tailscale-only access)
+- **URL**: https://trainwithgouli.mzm.co.in (shared nginx gateway, Tailscale-only access)
 - **Tailscale IP**: `100.73.187.82`
 - **Deployment Method**: Ansible playbook with Podman secrets, then shared nginx gateway reload
+- **Gateway Agent**: `~/workspace/.opencode/agents/nginx-gateway-agent.md`
 
 ### Production Server
 - **SSH Access**: `ssh prod`
 - **Purpose**: Production environment
 - **Applications**: Hosts containerized applications including ManakeeshHub (production) and other testing projects
 - **Container Runtime**: Podman (rootless containers)
-- **URL**: https://manakeeshhub.com
+- **URL**: https://trainwithgouli.com
 - **Deployment Method**: Ansible playbook with vault-encrypted secrets
+- **Gateway Agent**: `~/workspace/.opencode/agents/nginx-gateway-agent.md`
 
 ### Container Architecture
 - Both servers use **Podman** for containerized application hosting
@@ -267,14 +264,14 @@ If resuming, append/update the `## Resume Info` section with:
    - Approval rules: `workflow-rules-approval`
 3. Merge with AGENTS.md runtime rules (resolve conflicts: AGENTS.md wins on directory access, basic-memory wins on workflow state)
 
-Then read `.opencode/agents/*.md` files, parse frontmatter, categorize by capability:
+Then read `.opencode/agents/*.md` files **and** shared agents from `~/workspace/.opencode/agents/*.md`, parse frontmatter, categorize by capability:
 - Setup: git-worktree-operations
 - Research: code-research-agent
 - Debate: rival
 - Implementation: changes-fixes-agent
 - Database: database-dba
 - Deployment: deploy-agent
-- Gateway/Infrastructure: nginx-gateway-agent
+- Gateway/Infrastructure: nginx-gateway-agent (shared from `~/workspace/.opencode/agents/`)
 - Rollback: backup-rollback-agent
 - Analytics: analytics-seo-agent
 - Builder: subagent-builder
@@ -657,9 +654,9 @@ Revert all to EDITOR after subagent sequence completes.
 
 ## Integration with Basic-Memory
 
-**Write:** `basic_memory_write_note(project: "coding", directory: "manakeeshhub/orchestrator-workflows/{task-id}", title: "{filename}", content: "...", tags: [...])`
+**Write:** `basic_memory_write_note(project: "coding", directory: "trainwithgouli/orchestrator-workflows/{task-id}", title: "{filename}", content: "...", tags: [...])`
 
-**Read:** `basic_memory_read_note(project: "coding", identifier: "manakeeshhub/orchestrator-workflows/{task-id}/research-output")`
+**Read:** `basic_memory_read_note(project: "coding", identifier: "trainwithgouli/orchestrator-workflows/{task-id}/research-output")`
 
 **Subagent State Files:**
 - Location: `coding/workspace/orchestrator-workflows/{task-id}/{agent-name}-state.md`
