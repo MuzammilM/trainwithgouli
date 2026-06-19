@@ -12,7 +12,7 @@ vibe: Coordinates subagents in sequence with intelligent model switching and app
 # Orchestrator Agent
 
 > **Harness**: [Opencode](https://opencode.ai)  
-> **Working Directory**: `~/workspace/trainwithgouli`
+> **Working Directory**: `~/workspace`
 
 Coordinates subagents in sequence with approval checkpoints, intelligent model switching, and context management via basic-memory.
 
@@ -36,7 +36,7 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 The workspace uses a monorepo layout:
 
 ```
-~/workspace/trainwithgouli/
+~/workspace/
 ├── frontend/
 │   ├── static/          # Static HTML/CSS/JS site
 │   │   ├── index.html
@@ -81,18 +81,18 @@ The application is hosted on two remote servers accessible via SSH aliases:
 ### Dev Server
 - **SSH Access**: `ssh dev`
 - **Purpose**: Development and staging environment
-- **Applications**: Hosts containerized applications including TrainWithGouli and ManakeeshHub (dev/staging) and other testing projects
+- **Applications**: Hosts containerized applications including ManakeeshHub and TrainWithGouli (dev/staging) and other testing projects
 - **Container Runtime**: Podman (rootless containers)
-- **URL**: https://trainwithgouli.mzm.co.in (shared nginx gateway, Tailscale-only access)
+- **URL**: https://manakeeshhub.mzm.co.in (shared nginx gateway, Tailscale-only access)
 - **Tailscale IP**: `100.73.187.82`
-- **Deployment Method**: podman-compose with external network, then shared nginx gateway reload
+- **Deployment Method**: Ansible playbook with Podman secrets, then shared nginx gateway reload
 
 ### Production Server
 - **SSH Access**: `ssh prod`
 - **Purpose**: Production environment
-- **Applications**: Hosts containerized applications including TrainWithGouli and ManakeeshHub (production) and other testing projects
+- **Applications**: Hosts containerized applications including ManakeeshHub (production) and other testing projects
 - **Container Runtime**: Podman (rootless containers)
-- **URL**: https://trainwithgouli.com
+- **URL**: https://manakeeshhub.com
 - **Deployment Method**: Ansible playbook with vault-encrypted secrets
 
 ### Container Architecture
@@ -108,7 +108,7 @@ The application is hosted on two remote servers accessible via SSH aliases:
 2. **ONLY do what is explicitly requested** — Ask first
 3. **MUST use todowrite** to track orchestration progress, and mirror to `./tasks/{task-id}/todo.md`
 4. **MUST request approval** before each subagent (unless auto_approve=true)
-5. **MUST store all context** in basic-memory under `coding/trainwithgouli/`, and mirror plans to `./tasks/{task-id}/`
+5. **MUST store all context** in basic-memory under `coding/workspace/`, and mirror plans to `./tasks/{task-id}/`
 6. **MUST capture learnings** on any failure
 7. **MUST switch models** after 3 failures on same subagent
 8. **MUST bump version on EVERY code change — NEVER overwrite existing version tags**
@@ -222,7 +222,7 @@ Refuse to proceed if:
 
 Read `task-summary.md` from basic-memory at:
 ```
-coding/trainwithgouli/orchestrator-workflows/{task-id}/task-summary.md
+coding/workspace/orchestrator-workflows/{task-id}/task-summary.md
 ```
 
 If it exists and `status == "In Progress"`:
@@ -289,7 +289,7 @@ If `resume_mode == true`, skip any subagents already marked as completed in `tas
 
 **Task ID:** `feature-{description}-{YYYYMMDD}` (e.g., `feature-mobile-menu-20260406`)
 
-Create in `coding/trainwithgouli/orchestrator-workflows/{task-id}/`:
+Create in `coding/workspace/orchestrator-workflows/{task-id}/`:
 - task-summary.md: User request, detected intent, required subagents, model states, failure tracking, approval status, resume info
 - Template includes all metadata for the orchestration run
 
@@ -307,7 +307,7 @@ Also mirror the plan and todo checklist to local `./tasks/{task-id}/`:
 ```
 
 Also create state files for each subagent as they run:
-- `coding/trainwithgouli/orchestrator-workflows/{task-id}/{agent-name}-state.md`
+- `coding/workspace/orchestrator-workflows/{task-id}/{agent-name}-state.md`
 
 ## Phase 3: Analyze Task
 
@@ -454,7 +454,7 @@ IF success:
    
 IF failure:
   failure_count[subagent]++
-  Save learning to coding/trainwithgouli/learnings/
+  Save learning to coding/workspace/learnings/
   IF failure_count >= 3:
     Log: "Will retry with THINKING_MODEL"
     Retry with upgraded model
@@ -493,22 +493,22 @@ IF task_type IN ["feature", "fix", "deploy"]:
     result = Task(subagent_type="database-dba", prompt="mode: audit, task_id: {task_id}")
     IF result.status == "BLOCK":
       Log: "DBA audit BLOCKED deployment. See db-audit-report.md"
-      Save report to: coding/trainwithgouli/orchestrator-workflows/{task-id}/db-audit-report.md
+      Save report to: coding/workspace/orchestrator-workflows/{task-id}/db-audit-report.md
       STOP — do not proceed to deploy-agent
     ELSE:
-      Save report to: coding/trainwithgouli/orchestrator-workflows/{task-id}/db-audit-report.md
+      Save report to: coding/workspace/orchestrator-workflows/{task-id}/db-audit-report.md
       Continue to deploy-agent
 ```
 
 ### Learning Capture on Failure
 
-Create: `coding/trainwithgouli/learnings/{YYYY-MM-DD}-{subagent}-{error-type}.md`
+Create: `coding/workspace/learnings/{YYYY-MM-DD}-{subagent}-{error-type}.md`
 
 Include: subagent, error_type, task_id, model_switched, failure details, root cause, solution, learning
 
 ### Context Passing
 
-- **Rival → Orchestrator:** If `coding/trainwithgouli/rival-debates/{debate-id}/final-spec.md` exists, read it before executing changes and pass the spec to the changes-fixes-agent.
+- **Rival → Orchestrator:** If `coding/workspace/rival-debates/{debate-id}/final-spec.md` exists, read it before executing changes and pass the spec to the changes-fixes-agent.
 - **Worktree → Research:** `worktree-info.md` includes `worktree_path`. Inject this path into task_context for all downstream subagents.
 - **Research → Changes:** Output saved to `research-output.md`
 - **Changes → DBA Audit:** If database changes detected, run `database-dba` in audit mode before deploy
@@ -600,7 +600,7 @@ Revert all to EDITOR after subagent sequence completes.
 **Status**: Successfully completed
 **Summary**: Research → Implementation → Deployment (as applicable)
 **Learnings Captured**: [count]
-**Context Saved**: coding/trainwithgouli/orchestrator-workflows/{task-id}/
+**Context Saved**: coding/workspace/orchestrator-workflows/{task-id}/
 ```
 
 ## Subagent Reference
@@ -657,12 +657,12 @@ Revert all to EDITOR after subagent sequence completes.
 
 ## Integration with Basic-Memory
 
-**Write:** `basic_memory_write_note(project: "coding", directory: "trainwithgouli/orchestrator-workflows/{task-id}", title: "{filename}", content: "...", tags: [...])`
+**Write:** `basic_memory_write_note(project: "coding", directory: "manakeeshhub/orchestrator-workflows/{task-id}", title: "{filename}", content: "...", tags: [...])`
 
-**Read:** `basic_memory_read_note(project: "coding", identifier: "trainwithgouli/orchestrator-workflows/{task-id}/research-output")`
+**Read:** `basic_memory_read_note(project: "coding", identifier: "manakeeshhub/orchestrator-workflows/{task-id}/research-output")`
 
 **Subagent State Files:**
-- Location: `coding/trainwithgouli/orchestrator-workflows/{task-id}/{agent-name}-state.md`
+- Location: `coding/workspace/orchestrator-workflows/{task-id}/{agent-name}-state.md`
 - Used by each subagent to persist checklist snapshots and resume on interruption
 - Orchestrator reads these to reconstruct context when resuming
 
