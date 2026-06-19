@@ -56,7 +56,33 @@ This is a monorepo with the following structure:
   - `roles/secrets/` - Manage Podman secrets
   - `roles/trainwithgouli/` - Deploy app containers
 - `deploy/deploy.sh` - Deployment script (wraps Ansible)
-- `deploy/frontend/static/rollback.sh` - Rollback script
+- `deploy/docker-compose.yml` - Application containers for podman-compose
+- `deploy/README.md` - Deployment instructions
+- `../nginx-gateway/` - Shared reverse proxy gateway (external to this repo)
+
+## Shared Gateway
+
+The dev and production servers use a shared nginx gateway located at `~/workspace/nginx-gateway/`.
+
+- The gateway is the **only** container that binds ports `80` and `443`
+- TrainWithGouli containers must **not** include their own nginx-proxy service
+- TrainWithGouli containers must connect to the **external Docker network** `trainwithgouli`
+- Dev domain: `trainwithgouli.mzm.co.in`
+- Prod domain: `trainwithgouli.com`
+
+### After Deploying TrainWithGouli
+
+Once the application containers are healthy on the `trainwithgouli` network, enable the gateway config:
+
+```bash
+ssh dev
+mv /opt/nginx-gateway/env/dev/disabled/trainwithgouli.conf \
+   /opt/nginx-gateway/env/dev/conf.d/
+cd /opt/nginx-gateway
+ENV=dev podman-compose restart
+```
+
+For gateway-specific changes (new subdomain, certs, routing rules), delegate to the `nginx-gateway-agent`.
 
 ## Deployment Flow
 
@@ -64,9 +90,9 @@ This is a monorepo with the following structure:
 1. Build image (once):   ./scripts/frontend/static/build-docker.sh --push
                          → creates trainwithgouli-static:0.12.0 + :latest
 
-2. Deploy to dev:        ./deploy/deploy.sh dev
-                         → Ansible playbook targeting dev server (ssh dev)
-                         → Podman secrets injected at runtime
+2. Deploy to dev:        VERSION=0.1.0 podman-compose -f deploy/docker-compose.yml up -d
+                         → Containers join external trainwithgouli network
+                         → Enable gateway config and restart gateway
 
 3. Deploy to prod:       ./deploy/deploy.sh prod
                          → Ansible playbook targeting prod server (ssh prod)

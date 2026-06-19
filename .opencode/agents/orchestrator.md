@@ -81,15 +81,16 @@ The application is hosted on two remote servers accessible via SSH aliases:
 ### Dev Server
 - **SSH Access**: `ssh dev`
 - **Purpose**: Development and staging environment
-- **Applications**: Hosts containerized applications including TrainWithGouli (dev/staging) and other testing projects
+- **Applications**: Hosts containerized applications including TrainWithGouli and ManakeeshHub (dev/staging) and other testing projects
 - **Container Runtime**: Podman (rootless containers)
-- **URL**: https://server01.taild68ded.ts.net
-- **Deployment Method**: Ansible playbook with Podman secrets
+- **URL**: https://trainwithgouli.mzm.co.in (shared nginx gateway, Tailscale-only access)
+- **Tailscale IP**: `100.73.187.82`
+- **Deployment Method**: podman-compose with external network, then shared nginx gateway reload
 
 ### Production Server
 - **SSH Access**: `ssh prod`
 - **Purpose**: Production environment
-- **Applications**: Hosts containerized applications including TrainWithGouli (production) and other testing projects
+- **Applications**: Hosts containerized applications including TrainWithGouli and ManakeeshHub (production) and other testing projects
 - **Container Runtime**: Podman (rootless containers)
 - **URL**: https://trainwithgouli.com
 - **Deployment Method**: Ansible playbook with vault-encrypted secrets
