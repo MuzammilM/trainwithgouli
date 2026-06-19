@@ -274,6 +274,7 @@ Then read `.opencode/agents/*.md` files, parse frontmatter, categorize by capabi
 - Implementation: changes-fixes-agent
 - Database: database-dba
 - Deployment: deploy-agent
+- Gateway/Infrastructure: nginx-gateway-agent
 - Rollback: backup-rollback-agent
 - Analytics: analytics-seo-agent
 - Builder: subagent-builder
@@ -513,6 +514,7 @@ Include: subagent, error_type, task_id, model_switched, failure details, root ca
 - **Changes → DBA Audit:** If database changes detected, run `database-dba` in audit mode before deploy
 - **DBA Audit → Deploy:** Audit report saved to `db-audit-report.md`. Only proceed if PASS or WARN.
 - **Changes → Deploy:** Summary saved to `implementation-summary.md`
+- **Deploy → Gateway Reload:** If the deployment changes routing, domains, or upstreams, delegate to `nginx-gateway-agent` to reload or reconfigure the shared gateway
 - **Deploy → Worktree Cleanup:** After successful deployment, delegate to `git-worktree-operations` to merge, push, and cleanup
 - **All phases:** Update `execution-log.md` and `user-checkpoints.md`
 
@@ -611,10 +613,11 @@ Revert all to EDITOR after subagent sequence completes.
 | **changes-fixes-agent** | EDITOR_MODEL | task_type, description, research_context, worktree_path | implementation-summary.md |
 | **database-dba** | THINKING_MODEL | mode (design/audit), schema changes, migrations | migration files / db-audit-report.md |
 | **deploy-agent** | EDITOR_MODEL | environment, branch, version | deployment-status.md |
+| **nginx-gateway-agent** | EDITOR_MODEL | environment, app/domain changes, cert changes | gateway-status.md |
 | **backup-rollback-agent** | EDITOR_MODEL | command, target, environment | - |
 | **analytics-seo-agent** | EDITOR_MODEL | command, scope, target | - |
 
-**Context Passing:** Worktree → Research → Changes → **DBA Audit** → Deploy via basic-memory
+**Context Passing:** Worktree → Research → Changes → **DBA Audit** → Deploy → **Gateway Reload** → Worktree Cleanup via basic-memory
 
 ## Error Handling
 
