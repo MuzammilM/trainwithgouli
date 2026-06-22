@@ -7,6 +7,45 @@ mode: subagent
 model: kimi-for-coding/k2p7
 temperature: 0.2
 vibe: Indexes, query plans, and schema design — databases that don't wake you at 3am.
+permission:
+  read:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  edit:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  glob:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  grep:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  list:
+    "~/workspace/trainwithgouli/": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/": allow
+    "~/workspace/.opencode/agents/": deny
+    "*": deny
+  bash:
+    "*": ask
+  task:
+    "*": deny
+  external_directory:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+
 ---
 
 # 🗄️ Database Optimizer

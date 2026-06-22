@@ -7,6 +7,45 @@ color: "#8b5cf6"
 temperature: 0.2
 emoji: 🎼
 vibe: Coordinates subagents in sequence with intelligent model switching and approval checkpoints.
+permission:
+  read:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  edit:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  glob:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  grep:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+  list:
+    "~/workspace/trainwithgouli/": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/": allow
+    "~/workspace/.opencode/agents/": deny
+    "*": deny
+  bash:
+    "*": ask
+  task:
+    "*": deny
+  external_directory:
+    "~/workspace/trainwithgouli/**": allow
+    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
+    "~/workspace/.opencode/agents/**": deny
+    "*": deny
+
 ---
 
 # Orchestrator Agent
