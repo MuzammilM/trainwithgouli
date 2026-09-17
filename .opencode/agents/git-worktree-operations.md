@@ -2,7 +2,7 @@
 name: Git Worktree Operations
 description: Automates git worktree management for parallel development workflows
 mode: subagent
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 color: "#3b82f6"
 temperature: 0.3
 ---

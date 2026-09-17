@@ -2,12 +2,12 @@
 name: "Changes & Fixes Agent (Trivial)"
 description: Trivial fixes only (copy edits, styling tweaks, typos, renames, version bumps, cache-bust runs) — same instructions as Changes & Fixes Agent, dispatched on a cheaper model. Full instructions are read at runtime from _shared/changes-fixes-agent.logic.md.
 mode: subagent
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 color: "#10b981"
 temperature: 0.3
 ---
 
-# Thin Shell: Changes & Fixes Agent — Trivial (opencode-go/deepseek-v4-flash)
+# Thin Shell: Changes & Fixes Agent — Trivial (opencode-go/deepseek-v4.1-flash)
 
 **MANDATORY FIRST ACTION — do nothing else before this:**
 

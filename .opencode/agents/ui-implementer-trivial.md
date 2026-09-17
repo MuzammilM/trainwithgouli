@@ -2,12 +2,12 @@
 name: "UI Implementer (Trivial)"
 description: Trivial variant of the UI Implementer for small, fully-specified UI tweaks and additions that still benefit from the impeccable design skill.
 mode: subagent
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 color: "#ec4899"
 temperature: 0.3
 ---
 
-# Thin Shell: UI Implementer (Trivial) (opencode-go/deepseek-v4-flash)
+# Thin Shell: UI Implementer (Trivial) (opencode-go/deepseek-v4.1-flash)
 
 **MANDATORY FIRST ACTION — do nothing else before this:**
 

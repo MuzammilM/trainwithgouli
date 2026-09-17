@@ -32,7 +32,7 @@ export function AddClientForm() {
   return (
     <section aria-label="Add client" className="border-2 border-[var(--border)] bg-[var(--surface)] p-4 mb-8">
       <h2 className="font-display text-2xl uppercase mb-4">Add client</h2>
-      <form action={handleSubmit} className="grid gap-3 md:grid-cols-[1fr_2fr_auto] items-start">
+      <form action={handleSubmit} className="grid gap-3 md:grid-cols-[1fr_2fr_auto] items-end">
         <div>
           <label htmlFor="client-email" className="block font-mono text-xs uppercase text-[var(--muted)] mb-1">
             Client email

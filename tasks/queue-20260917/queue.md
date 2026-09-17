@@ -8,7 +8,7 @@
 | Q-2 | Redesign website (impeccable): black/red gritty, mobile-first | feature | high | **completed** (30614ca, branch `feature/gouli-website-redesign-20260917`) | feature-gouli-website-redesign-20260917 |
 | Q-3 | Google Sheets integration (direct Sheets API, SA key from manakeeshhub) | feature | medium | pending (P3) | — |
 | Q-4 | Google SSO via PocketBase OAuth2 (smarann GCP client reused) | feature | medium | **P1 done** (provider configured, coaches seeded) | feature-pocketbase-auth-20260917 |
-| Q-5 | Gouli client management (add client, verify SA share, first user madebymzm@gmail.com) | feature | medium | pending | — |
+| Q-5 | Gouli client management (add client, verify SA share, first user madebymzm@gmail.com) | feature | medium | **done** (P2, 0.5.0) | feature-client-management-20260917 |
 | Q-6 | Workout generation w/ YouTube links + last-weight from sheet | feature | medium | pending | — |
 
 ## Q-1: Merge current feature branch to main
@@ -51,3 +51,12 @@
 - Deployed dev: frontend-v0.4.0 container, service creds injected via 600 frontend.env (ssh pipe from dev02, never in transcript), gateway reloaded. Live checks pass (home/login/exercises 200, Google button present, env vars present).
 - MANUAL TEST PENDING (needs human Google login): harishgouli27@gmail.com login → coach session; unregistered gmail → not-registered error box; logout.
 - Next: P2 client-management UI, P3 sheets sync, P4 workout day page.
+
+
+## P2 Client management + version pill (completed 2026-09-17)
+
+- Subagent built /clients (coach-only): add-client form hard-blocks until SA can access the sheet (inline share instructions naming mcp-sheets-service@…), Verified pill, remove; Nav Clients link (coach-gated). Version pill bottom-right (`v0.5.0 — reps lifted in the gym`, day-rotating captions). Commit 05df006, merged, release 0.5.0, deployed dev.
+- Deploy gotchas solved: SA key mount unreadable by container `nextjs` user (EACCES) → readable copy at ~/trainwithgouli/google_sa.json (644, tradeoff on single-user dev box); googleapis not requireable in standalone image (bundled) → verification done via raw-jwt node script.
+- First client seeded: madebymzm@gmail.com → coach muzammilhmomin, sheet 1vKQIl4NneKNWJWeDLC3PSw0F7uxYZzPxeSB8derWEAk (sheet "Mr.M"), verified=true. Container→Sheets API chain proven end-to-end.
+- Manual test pending: coach login → /clients → add client with unshared sheet (expect block + instructions) → share → re-submit (expect Verified).
+- Next: P3 sheets history sync + last-weight API; P4 workout day page.

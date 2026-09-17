@@ -2,7 +2,7 @@
 name: "Analytics/SEO Agent"
 description: Manages analytics monitoring, SEO optimization, and Core Web Vitals for TrainWithGouli with PostHog integration and automated asset generation
 mode: subagent
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 color: "#f59e0b"
 temperature: 0.2
 ---

@@ -43,7 +43,7 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 - Use when: deep recovery after senior-agent failed, hard time threshold exceeded, or runaway loop detected
 - **REQUIRES explicit manual approval before every invocation**
 
-**EDITOR_MODEL**: `opencode-go/deepseek-v4-flash`
+**EDITOR_MODEL**: `opencode-go/deepseek-v4.1-flash`
 - Default for: git-worktree-operations, deploy-agent, backup-rollback-agent, analytics-seo-agent
 - Conditional default for: `changes-fixes-agent-trivial`, `android-developer-trivial` — only when task classified TRIVIAL (criteria below)
 - Use when: deterministic/mechanical operations, trivial fixes, no architecture/state/navigation judgment
@@ -73,12 +73,12 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 **Thin-Shell Architecture (2026-07-13)**: opencode caches agent definitions (incl. `model:`) at startup — runtime model swaps do NOT work mid-session. Models baked into static agent files:
 - `changes-fixes-agent.md` / `android-developer.md` / `ui-implementer.md` — `kimi-for-coding/kimi-for-coding` shells (standard, fallback)
 - `changes-fixes-agent-advanced.md` / `android-developer-advanced.md` / `ui-implementer-advanced.md` — `kimi-for-coding/kimi-for-coding` shells (advanced)
-- `changes-fixes-agent-trivial.md` / `android-developer-trivial.md` / `ui-implementer-trivial.md` — `opencode-go/deepseek-v4-flash` shells (trivial only)
+- `changes-fixes-agent-trivial.md` / `android-developer-trivial.md` / `ui-implementer-trivial.md` — `opencode-go/deepseek-v4.1-flash` shells (trivial only)
 - `validator-agent.md` — `kimi-for-coding/kimi-for-coding` shell
 - `senior-agent.md` — `kimi-for-coding/kimi-for-coding` shell
 - `senior-agent-escalated.md` — `kimi-for-coding/k3-256k` shell (manual approval required)
 - Shell bodies are pointers reading full instructions at runtime from `.opencode/agents/_shared/{role}.logic.md` — logic-file edits apply at next dispatch, all shells, no restart
-- 4 mechanical agents (git-worktree-operations, deploy-agent, backup-rollback-agent, analytics-seo-agent) carry `opencode-go/deepseek-v4-flash` directly in frontmatter
+- 4 mechanical agents (git-worktree-operations, deploy-agent, backup-rollback-agent, analytics-seo-agent) carry `opencode-go/deepseek-v4.1-flash` directly in frontmatter
 - NEVER edit agent file `model:` at dispatch time; select right agent file instead
 
 ## Project Structure
@@ -756,7 +756,7 @@ IF dispatched_agent IN ["changes-fixes-agent-trivial", "android-developer-trivia
 IF subagent IN ["changes-fixes-agent", "android-developer"] AND task_is_trivial():
   // Trivial Task Criteria (see Model Configuration): fix not feature, <= 2 files,
   // no DB/API contract changes, no state/navigation/architecture changes, exact change specified
-  dispatched_agent = "{subagent}-trivial"    // opencode-go/deepseek-v4-flash shell
+  dispatched_agent = "{subagent}-trivial"    // opencode-go/deepseek-v4.1-flash shell
   Log: "Dispatched {subagent} as {dispatched_agent} (trivial → EDITOR_MODEL)"
 ELSE IF subagent IN ["changes-fixes-agent", "android-developer"] AND task_is_advanced():
   // Advanced Task Criteria (see Model Configuration): user explicitly asks for advanced reasoning,

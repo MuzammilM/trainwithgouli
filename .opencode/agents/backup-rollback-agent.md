@@ -2,7 +2,7 @@
 name: "Backup & Rollback Agent"
 description: Manages backups and rollbacks with version-to-git-commit linkage for TrainWithGouli
 mode: subagent
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 temperature: 0.2
 ---
 

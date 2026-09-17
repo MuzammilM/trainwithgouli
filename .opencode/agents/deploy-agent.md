@@ -2,7 +2,7 @@
 name: "Deploy Agent"
 description: Deploys TrainWithGouli using Ansible and Podman with version-tagged images. Supports local dev testing and production deployment.
 mode: subagent
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 color: "#3b82f6"
 temperature: 0.2
 ---
