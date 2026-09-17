@@ -9,7 +9,7 @@
 | Q-3 | Google Sheets integration (direct Sheets API, SA key from manakeeshhub) | feature | medium | pending (P3) | — |
 | Q-4 | Google SSO via PocketBase OAuth2 (smarann GCP client reused) | feature | medium | **P1 done** (provider configured, coaches seeded) | feature-pocketbase-auth-20260917 |
 | Q-5 | Gouli client management (add client, verify SA share, first user madebymzm@gmail.com) | feature | medium | **done** (P2, 0.5.0) | feature-client-management-20260917 |
-| Q-6 | Workout generation w/ YouTube links + last-weight from sheet | feature | medium | pending | — |
+| Q-6 | Workout day builder w/ guide + sheet write-back | feature | medium | **done** (P3+P4, 0.6.0) | feature-sheets-day-builder-20260917 |
 
 ## Q-1: Merge current feature branch to main
 
@@ -60,3 +60,12 @@
 - First client seeded: madebymzm@gmail.com → coach muzammilhmomin, sheet 1vKQIl4NneKNWJWeDLC3PSw0F7uxYZzPxeSB8derWEAk (sheet "Mr.M"), verified=true. Container→Sheets API chain proven end-to-end.
 - Manual test pending: coach login → /clients → add client with unshared sheet (expect block + instructions) → share → re-submit (expect Verified).
 - Next: P3 sheets history sync + last-weight API; P4 workout day page.
+
+
+## P3+P4 Sheets day builder (completed 2026-09-17)
+
+- P3 (fb2550c): sheet history parser (banner/date-block, DD/MM/YYYY, free-text weights/reps, tab by email local-part), /api/sheets/history + /api/sheets/last (coach ?client= / client own-record), 5-min TTL cache; exercises body_part multi-select + UI chips/pills.
+- P4 (e238692): /today page — coach client selector, exercise picker w/ search + body-part chip filter, last-lift guide line under weight ("Last: 60kg × 2-5 @ 5 · 27/06" / "No history yet"), Form video link, save appends house-format block (banner/date/headers/rows/cool-down) + bold/italic formatting via batchUpdate, cache invalidated on write. Editor-share fix (883f212).
+- Released 0.6.0, deployed dev. Verified: parser on REAL sheet (31 rows / 4 days; last bench 2026-08-22), endpoints 401 logged-out, home+/today 200.
+- OPEN: user's madebymzm sheet shared as Viewer — must bump SA to EDITOR for write-back; first real save is the write test. Guide misses typo names (Trap bar dead left) until alias map (v2).
+- Orchestration learning: ssh '...' << heredoc silently eats quotes (ssh single-quote termination) — pipe via `cat << EOF | ssh host 'podman exec -i c node'` instead.
