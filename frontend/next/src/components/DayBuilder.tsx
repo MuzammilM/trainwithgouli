@@ -153,7 +153,7 @@ function DayRowFields({
 
   return (
     <div className="border-2 border-[var(--border)] p-3 bg-[var(--background)] space-y-2">
-      <div className="grid grid-cols-12 gap-2 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-2 md:items-end">
         <div className="col-span-12 md:col-span-4">
           <label className="block text-xs font-bold uppercase mb-1">Exercise *</label>
           <input type="hidden" name="exercise[]" value={row.exerciseName} />
@@ -180,7 +180,7 @@ function DayRowFields({
             </a>
           )}
         </div>
-        <div className="col-span-4 md:col-span-2">
+        <div className="col-span-12 md:col-span-2">
           <label className="block text-xs font-bold uppercase mb-1">Weight *</label>
           <input
             type="text"
@@ -193,14 +193,14 @@ function DayRowFields({
           {row.exerciseName && (
             <span className="block mt-1 font-mono text-[11px] text-[var(--muted)]">
               {last
-                ? `Last: ${last.weight} × ${last.reps} @ ${last.sets} · ${formatGuideDate(last.date)}`
+                ? `Last: ${last.weight} · ${formatGuideDate(last.date)}`
                 : historyError
                   ? 'History unavailable'
                   : 'No history yet'}
             </span>
           )}
         </div>
-        <div className="col-span-4 md:col-span-2">
+        <div className="col-span-12 md:col-span-2">
           <label className="block text-xs font-bold uppercase mb-1">Reps *</label>
           <input
             type="text"
@@ -210,8 +210,11 @@ function DayRowFields({
             onChange={(e) => onChange(index, { reps: e.target.value })}
             className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)] font-mono"
           />
+          {row.exerciseName && last && (
+            <span className="block mt-1 font-mono text-[11px] text-[var(--muted)]">Last: {last.reps}</span>
+          )}
         </div>
-        <div className="col-span-4 md:col-span-2">
+        <div className="col-span-12 md:col-span-2">
           <label className="block text-xs font-bold uppercase mb-1">Sets</label>
           <input
             type="text"
@@ -220,8 +223,11 @@ function DayRowFields({
             onChange={(e) => onChange(index, { sets: e.target.value })}
             className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)] font-mono"
           />
+          {row.exerciseName && last && (
+            <span className="block mt-1 font-mono text-[11px] text-[var(--muted)]">Last: {last.sets}</span>
+          )}
         </div>
-        <div className="col-span-10 md:col-span-1">
+        <div className="col-span-12 md:col-span-1">
           <label className="block text-xs font-bold uppercase mb-1">Notes</label>
           <input
             type="text"
@@ -231,7 +237,7 @@ function DayRowFields({
             className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)]"
           />
         </div>
-        <div className="col-span-2 md:col-span-1">
+        <div className="col-span-12 md:col-span-1 flex md:block">
           <button
             type="button"
             onClick={() => onRemove(index)}
@@ -243,7 +249,7 @@ function DayRowFields({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-2">
         {BODY_PARTS.map((part) => (
           <button
             key={part}
@@ -265,7 +271,7 @@ function DayRowFields({
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search exercises…"
           aria-label="Filter exercises"
-          className="ml-auto px-2 py-1 border-2 border-[var(--border)] bg-[var(--surface)] font-mono text-xs w-40"
+          className="w-full md:ml-auto md:w-40 px-2 py-1 border-2 border-[var(--border)] bg-[var(--surface)] font-mono text-xs order-first md:order-last"
         />
       </div>
     </div>
