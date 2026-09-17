@@ -96,6 +96,7 @@ out of components — behind the adapter only.
   data via the volume mountpoint on the host: `~/.local/share/containers/storage/volumes/pocketbase-data/_data`.
 - **Backup API names must end in `.zip`** — otherwise 400 `validation_match_invalid`.
   Backups land in `/pb_data/backups/<name>.zip` (+ `.attrs` sidecar); delete both on cleanup.
+- **Collections created via the API have NO default fields.** Admin-UI creation gives you `created`/`updated` autodate fields automatically; API creation gives you nothing extra — sorting by `-created` then fails with an opaque 400 "Something went wrong while processing your request". Always add `{name:"created",type:"autodate",onCreate:true,onUpdate:false}` + `{name:"updated",type:"autodate",onCreate:true,onUpdate:true}` explicitly.
 - **FROM scratch = no CA certs.** Outbound HTTPS to real providers (e.g. Google `oauth2.googleapis.com/token` during OAuth2 login) fails with `x509: certificate signed by unknown authority`. Fix: quadlet mounts `/etc/ssl/certs:/etc/ssl/serts:ro` — see `pocketbase.container` `Volume=/etc/ssl/certs:/etc/ssl/certs:ro` (added 2026-09-17). Restarting PocketBase changes the container IP → reload the nginx gateway or you get 502s.
 - **Docker Hub is unreachable/rate-limited from dev02.** To upgrade PocketBase: download
   the linux_amd64 zip from GitHub releases, replace the binary in `~/pocketbase-build/`,
