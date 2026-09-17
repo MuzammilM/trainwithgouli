@@ -1,6 +1,7 @@
-const VERSION = '0.4.0'
+const VERSION = '0.5.0'
 
 const VERSION_HISTORY = [
+  { version: '0.5.0', date: '2026-09-17', description: 'Coach client management with sheet-share verification gate; version pill' },
   { version: '0.4.0', date: '2026-09-17', description: 'PocketBase auth foundation — Google SSO, invite-only, Supabase removed' },
   { version: '0.3.0', date: '2026-09-17', description: 'IRON/RED redesign — black/red gritty theme, mobile-first, route transitions' },
   { version: '0.2.0', date: '2026-06-17', description: 'Build TrainWithGouli workout tracker' },
