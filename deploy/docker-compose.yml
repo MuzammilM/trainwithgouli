@@ -2,6 +2,8 @@ services:
   frontend-next:
     image: docker.io/muzammilmomin/trainwithgouli:frontend-v${VERSION}
     container_name: trainwithgouli-frontend-next
+    env_file:
+      - frontend.env
     expose:
       - "3000"
     networks:

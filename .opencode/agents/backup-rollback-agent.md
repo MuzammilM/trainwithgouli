@@ -4,45 +4,6 @@ description: Manages backups and rollbacks with version-to-git-commit linkage fo
 mode: subagent
 model: opencode-go/deepseek-v4-flash
 temperature: 0.2
-vibe: Safely manages rollbacks with version-to-git-commit linkage.
-permission:
-  read:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  edit:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  glob:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  grep:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  list:
-    "~/workspace/trainwithgouli/": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/": allow
-    "~/workspace/.opencode/agents/": deny
-    "*": deny
-  bash:
-    "*": ask
-  task:
-    "*": deny
-  external_directory:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
 ---
 
 

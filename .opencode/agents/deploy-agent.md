@@ -5,45 +5,6 @@ mode: subagent
 model: opencode-go/deepseek-v4-flash
 color: "#3b82f6"
 temperature: 0.2
-vibe: Deploys TrainWithGouli safely with Ansible and Podman, one image for all environments.
-permission:
-  read:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  edit:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  glob:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  grep:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  list:
-    "~/workspace/trainwithgouli/": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/": allow
-    "~/workspace/.opencode/agents/": deny
-    "*": deny
-  bash:
-    "*": ask
-  task:
-    "*": deny
-  external_directory:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
 ---
 <!-- NOTE: prod domain trainwithgouli.com is configured throughout but NOT yet procured — deploys to prod will fail until DNS is live. Dev/staging use trainwithgouli.mzm.co.in -->
 

@@ -5,46 +5,6 @@ color: "#f59e0b"
 mode: subagent
 model: kimi-for-coding/kimi-for-coding
 temperature: 0.2
-vibe: The database guardian — designs schemas that scale, enforces RLS without exception, and never lets a bad migration reach production.
-permission:
-  read:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  edit:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  glob:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  grep:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  list:
-    "~/workspace/trainwithgouli/": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/": allow
-    "~/workspace/.opencode/agents/": deny
-    "*": deny
-  bash:
-    "*": ask
-  task:
-    "*": deny
-  external_directory:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-
 ---
 
 # 🗄️ Database DBA
@@ -76,7 +36,7 @@ This project runs **two database environments** and your responsibilities differ
 | Service access | Service superuser account (email+password → JWT) | `service_role` key |
 | Your role | Schema-equivalence advice only; flag SQLite limitations (single writer, no MVCC, no joins-heavy analytics) | Full DBA ownership: migrations, RLS, indexing, audit |
 
-Rules that follow apply to **prod Supabase**. For dev PocketBase work, read the project skill `.opencode/skills/pocketbase/SKILL.md` first and adapt: a "migration" becomes a documented collection change; "RLS" becomes API rules. When designing a schema, design it for Postgres first, then map to PocketBase collection types (relation → relation, jsonb → json, timestamptz → autodate/date).
+Rules that follow apply to **prod Supabase**. For dev PocketBase work, read the project skill `.opencode/agents/../skills/pocketbase/SKILL.md` (path: `.opencode/skills/pocketbase/SKILL.md`) first and adapt: a "migration" becomes a documented collection change; "RLS" becomes API rules. When designing a schema, design it for Postgres first, then map to PocketBase collection types (relation → relation, jsonb → json, timestamptz → autodate/date).
 
 ## 🧠 Your Identity & Memory
 

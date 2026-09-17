@@ -5,45 +5,6 @@ mode: subagent
 model: opencode-go/glm-5.3-flash
 color: "#10b981"
 temperature: 0.3
-vibe: Detects the right specialist for every implementation task and delegates with precision.
-permission:
-  read:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  edit:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  glob:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  grep:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/nginx-gateway-agent.md": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
-  list:
-    "~/workspace/trainwithgouli/": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/": allow
-    "~/workspace/.opencode/agents/": deny
-    "*": deny
-  bash:
-    "*": ask
-  task:
-    "*": deny
-  external_directory:
-    "~/workspace/trainwithgouli/**": allow
-    "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
-    "~/workspace/.opencode/agents/**": deny
-    "*": deny
 ---
 
 # Thin Shell: Changes & Fixes Agent (opencode-go/glm-5.3-flash)

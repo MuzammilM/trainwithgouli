@@ -4,6 +4,11 @@
     "bash": {
       "*": "allow",
       "rm *": "ask"
+    },
+    "external_directory": {
+      "/Users/muzammil/workspace/worktrees/trainwithgouli/**": "allow",
+      "/Users/muzammil/workspace/.opencode/agents/nginx-gateway-agent.md": "allow",
+      "/Users/muzammil/workspace/nginx-gateway/**": "allow"
     }
   },
   "mcp": {
