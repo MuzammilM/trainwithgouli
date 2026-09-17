@@ -2,6 +2,7 @@ import 'server-only'
 import { google } from 'googleapis'
 
 const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+const SHEETS_SCOPE_READWRITE = 'https://www.googleapis.com/auth/spreadsheets'
 
 /**
  * Extract the spreadsheet ID from a Google Sheets URL.
@@ -22,16 +23,18 @@ export function parseSheetId(url: string): string | null {
 /**
  * Build a JWT-authenticated Sheets client. Lazy so the build never touches
  * the key file — the key is only read at request time.
+ * Pass writable=true for read/write scope (appends, formatting).
  */
-function getSheetsClient() {
+function getSheetsClient(writable = false) {
   const keyFile = process.env.GOOGLE_SA_KEY_FILE
   const keyJson = process.env.GOOGLE_SA_KEY
+  const scopes = [writable ? SHEETS_SCOPE_READWRITE : SHEETS_SCOPE]
   let auth
   if (keyFile) {
-    auth = new google.auth.GoogleAuth({ keyFile, scopes: [SHEETS_SCOPE] })
+    auth = new google.auth.GoogleAuth({ keyFile, scopes })
   } else if (keyJson) {
     const credentials = JSON.parse(keyJson)
-    auth = new google.auth.GoogleAuth({ credentials, scopes: [SHEETS_SCOPE] })
+    auth = new google.auth.GoogleAuth({ credentials, scopes })
   } else {
     throw new Error('missing-sa-config')
   }
@@ -126,6 +129,30 @@ const HISTORY_TTL_MS = 5 * 60 * 1000
 const historyCache = new Map<string, HistoryCacheEntry>()
 
 /**
+ * Drop the cached history for a sheet. Must be called after any write
+ * (appendDayBlock) so the 5-minute cache never serves stale rows.
+ */
+export function clearHistoryCache(sheetId: string): void {
+  historyCache.delete(sheetId)
+}
+
+/**
+ * Resolve the tab title for a client's sheet: the email local part
+ * (e.g. "madebymzm" for madebymzm@gmail.com), falling back to the first
+ * visible sheet. Returns null when the spreadsheet has no visible sheets.
+ */
+async function resolveTabTitle(sheetId: string, email: string): Promise<string | null> {
+  const sheets = getSheetsClient()
+  const meta = await sheets.spreadsheets.get({ spreadsheetId: sheetId })
+  const sheetList = meta.data.sheets ?? []
+  const visible = sheetList.filter((s) => s.properties?.hidden !== true)
+  const localPart = email.split('@')[0].trim().toLowerCase()
+  const target =
+    visible.find((s) => (s.properties?.title ?? '').trim().toLowerCase() === localPart) ?? visible[0]
+  return target?.properties?.title ?? null
+}
+
+/**
  * Fetch a client's workout history from their sheet.
  * The tab is named the email local part (e.g. "madebymzm" for madebymzm@gmail.com);
  * falls back to the first visible sheet. Results cached per sheetId for 5 minutes.
@@ -134,17 +161,10 @@ export async function fetchClientHistory(sheetId: string, email: string): Promis
   const cached = historyCache.get(sheetId)
   if (cached && Date.now() - cached.at < HISTORY_TTL_MS) return cached.rows
 
-  const sheets = getSheetsClient()
-
-  const meta = await sheets.spreadsheets.get({ spreadsheetId: sheetId })
-  const sheetList = meta.data.sheets ?? []
-  const visible = sheetList.filter((s) => s.properties?.hidden !== true)
-  const localPart = email.split('@')[0].trim().toLowerCase()
-  const target =
-    visible.find((s) => (s.properties?.title ?? '').trim().toLowerCase() === localPart) ?? visible[0]
-  const tabTitle = target?.properties?.title
+  const tabTitle = await resolveTabTitle(sheetId, email)
   if (!tabTitle) return []
 
+  const sheets = getSheetsClient()
   const quoted = `'${tabTitle.replace(/'/g, "''")}'`
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
@@ -154,6 +174,136 @@ export async function fetchClientHistory(sheetId: string, email: string): Promis
   const rows = parseHistory((res.data.values ?? []) as string[][])
   historyCache.set(sheetId, { rows, at: Date.now() })
   return rows
+}
+
+/** Format an ISO date (YYYY-MM-DD) as DD/MM/YYYY for the sheet house format. */
+export function ddMmYyyy(dateISO: string): string {
+  const [y, m, d] = dateISO.split('-')
+  if (!y || !m || !d) return dateISO
+  return `${d}/${m}/${y}`
+}
+
+export type DayRow = {
+  exercise: string
+  weight: string
+  reps: string
+  sets: string
+  rest?: string
+}
+
+const COOL_DOWN_LINE =
+  'Cool downtown • Static stretch • Hold the stretch 10-15sec • Exhale and Inhale comfortably.'
+
+/**
+ * Append a workout day-block to the client's sheet in the house format:
+ * banner → DD/MM/YYYY date row → column headers → exercise rows (date repeated)
+ * → cool-down footer. Then applies minimal formatting (bold banner with black
+ * background + white text, bold date row, italic cool-down) via one batchUpdate.
+ * Clears the history cache so subsequent reads see the new rows.
+ */
+export async function appendDayBlock(
+  sheetId: string,
+  email: string,
+  dateISO: string,
+  rows: DayRow[],
+): Promise<void> {
+  const tabTitle = await resolveTabTitle(sheetId, email)
+  if (!tabTitle) throw new Error('no-tab')
+
+  const sheets = getSheetsClient(true)
+  const quoted = `'${tabTitle.replace(/'/g, "''")}'`
+
+  const values = [
+    ['Train with Harry Gouli'],
+    [ddMmYyyy(dateISO)],
+    ['Date', 'Workouts', 'Weights', 'Repetition', 'Sets', 'Rest'],
+    ...rows.map((r) => [ddMmYyyy(dateISO), r.exercise, r.weight, r.reps, r.sets, r.rest ?? '']),
+    [COOL_DOWN_LINE],
+  ]
+
+  const appendRes = await sheets.spreadsheets.values.append({
+    spreadsheetId: sheetId,
+    range: `${quoted}!A1`,
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values },
+  })
+
+  // Derive the first appended row from the updated range (e.g. 'Tab'!A12:F18)
+  const updatedRange = appendRes.data.updates?.updatedRange ?? ''
+  const rowMatch = updatedRange.match(/![A-Z]+(\d+)/)
+  const startRow = rowMatch ? Number(rowMatch[1]) : null
+
+  if (startRow != null) {
+    const bannerRowIndex = startRow - 1 // 0-based grid coordinates
+    const dateRowIndex = bannerRowIndex + 1
+    const coolDownRowIndex = bannerRowIndex + values.length - 1
+    const sheetIdNumeric = await resolveNumericSheetId(sheetId, tabTitle)
+
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: sheetId,
+      requestBody: {
+        requests: [
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetIdNumeric,
+                startRowIndex: bannerRowIndex,
+                endRowIndex: bannerRowIndex + 1,
+                startColumnIndex: 0,
+                endColumnIndex: 6,
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: { red: 0, green: 0, blue: 0 },
+                  textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 }, bold: true },
+                },
+              },
+              fields: 'userEnteredFormat(backgroundColor,textFormat)',
+            },
+          },
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetIdNumeric,
+                startRowIndex: dateRowIndex,
+                endRowIndex: dateRowIndex + 1,
+                startColumnIndex: 0,
+                endColumnIndex: 6,
+              },
+              cell: { userEnteredFormat: { textFormat: { bold: true } } },
+              fields: 'userEnteredFormat.textFormat.bold',
+            },
+          },
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetIdNumeric,
+                startRowIndex: coolDownRowIndex,
+                endRowIndex: coolDownRowIndex + 1,
+                startColumnIndex: 0,
+                endColumnIndex: 6,
+              },
+              cell: { userEnteredFormat: { textFormat: { italic: true } } },
+              fields: 'userEnteredFormat.textFormat.italic',
+            },
+          },
+        ],
+      },
+    })
+  }
+
+  clearHistoryCache(sheetId)
+}
+
+/** Resolve the numeric sheetId (grid id) for a tab title. */
+async function resolveNumericSheetId(spreadsheetId: string, tabTitle: string): Promise<number> {
+  const sheets = getSheetsClient()
+  const meta = await sheets.spreadsheets.get({ spreadsheetId })
+  const sheet = (meta.data.sheets ?? []).find(
+    (s) => (s.properties?.title ?? '').trim().toLowerCase() === tabTitle.trim().toLowerCase(),
+  )
+  return sheet?.properties?.sheetId ?? 0
 }
 
 export type SheetAccessResult =

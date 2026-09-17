@@ -10,11 +10,18 @@ const LINKS = [
   { href: '/days', label: 'Days' },
 ]
 
+const AUTH_LINKS = [{ href: '/today', label: 'Today' }]
+
 const COACH_LINKS = [{ href: '/clients', label: 'Clients' }]
 
 function NavLinks({ className, user }: { className?: string; user?: { role?: string } | null }) {
   const pathname = usePathname()
-  const links = user?.role === 'coach' ? [...LINKS, ...COACH_LINKS] : LINKS
+  const links =
+    user?.role === 'coach'
+      ? [...LINKS, ...AUTH_LINKS, ...COACH_LINKS]
+      : user
+        ? [...LINKS, ...AUTH_LINKS]
+        : LINKS
   return (
     <div className={className}>
       {links.map((link) => (

@@ -1,5 +1,5 @@
-// Standalone parser sanity test — mirrors parseHistory() from
-// frontend/next/src/lib/google/sheets.ts (house format, columns A–F).
+// Standalone parser sanity test — mirrors parseHistory() and appendDayBlock()
+// value assembly from frontend/next/src/lib/google/sheets.ts (house format, columns A–F).
 // Run: node tasks/feature-sheets-day-builder-20260917/parser-fixture-test.mjs
 
 function parseDdMmYyyy(raw) {
@@ -87,6 +87,69 @@ check('no banner rows parsed', rows.every((r) => r.exercise !== 'Train with Harr
 check('no "Workouts" header rows parsed', rows.every((r) => r.exercise !== 'Workouts'))
 check('invalid date 31/02/2026 → null', parseDdMmYyyy('31/02/2026') === null)
 check('valid date 01/09/2026 → 2026-09-01', parseDdMmYyyy('01/09/2026') === '2026-09-01')
+
+// ---- appendDayBlock values shape (mirrors the assembly in sheets.ts) ----
+
+function ddMmYyyy(dateISO) {
+  const [y, m, d] = dateISO.split('-')
+  if (!y || !m || !d) return dateISO
+  return `${d}/${m}/${y}`
+}
+
+const COOL_DOWN_LINE =
+  'Cool downtown • Static stretch • Hold the stretch 10-15sec • Exhale and Inhale comfortably.'
+
+function buildAppendValues(dateISO, rows) {
+  return [
+    ['Train with Harry Gouli'],
+    [ddMmYyyy(dateISO)],
+    ['Date', 'Workouts', 'Weights', 'Repetition', 'Sets', 'Rest'],
+    ...rows.map((r) => [ddMmYyyy(dateISO), r.exercise, r.weight, r.reps, r.sets, r.rest ?? '']),
+    [COOL_DOWN_LINE],
+  ]
+}
+
+const appendRows = [
+  { exercise: 'Deadlift', weight: '100 kg', reps: '5', sets: '3', rest: '90s' },
+  { exercise: 'Pull Up', weight: 'BW', reps: 'AMRAP', sets: '4' }, // no rest → empty cell
+]
+
+const values = buildAppendValues('2026-09-17', appendRows)
+
+const expectedValues = [
+  ['Train with Harry Gouli'],
+  ['17/09/2026'],
+  ['Date', 'Workouts', 'Weights', 'Repetition', 'Sets', 'Rest'],
+  ['17/09/2026', 'Deadlift', '100 kg', '5', '3', '90s'],
+  ['17/09/2026', 'Pull Up', 'BW', 'AMRAP', '4', ''],
+  [COOL_DOWN_LINE],
+]
+
+check(`append values row count = ${expectedValues.length} (got ${values.length})`, values.length === expectedValues.length)
+for (let i = 0; i < expectedValues.length; i++) {
+  const ok = JSON.stringify(values[i]) === JSON.stringify(expectedValues[i])
+  check(`append values[${i}] = ${JSON.stringify(expectedValues[i])}`, ok)
+}
+check('append: banner is row 0', values[0][0] === 'Train with Harry Gouli')
+check('append: date row is DD/MM/YYYY', values[1][0] === '17/09/2026')
+check('append: header row matches house columns', JSON.stringify(values[2]) === JSON.stringify(['Date', 'Workouts', 'Weights', 'Repetition', 'Sets', 'Rest']))
+check('append: per-row date repetition', values[3][0] === '17/09/2026' && values[4][0] === '17/09/2026')
+check('append: cool-down footer is last row', values[values.length - 1][0] === COOL_DOWN_LINE)
+check('append: round-trip — parseHistory reads back 2 rows', (() => {
+  const back = parseHistory(values)
+  return (
+    back.length === 2 &&
+    back[0].date === '2026-09-17' &&
+    back[0].exercise === 'Deadlift' &&
+    back[0].weight === '100 kg' &&
+    back[0].reps === '5' &&
+    back[0].sets === '3' &&
+    back[0].rest === '90s' &&
+    back[1].exercise === 'Pull Up' &&
+    back[1].rest === ''
+  )
+})())
+check('ddMmYyyy 2026-01-05 → 05/01/2026', ddMmYyyy('2026-01-05') === '05/01/2026')
 
 console.log(pass ? '\nALL CHECKS PASSED' : '\nSOME CHECKS FAILED')
 process.exit(pass ? 0 : 1)
