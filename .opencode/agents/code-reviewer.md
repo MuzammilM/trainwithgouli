@@ -2,9 +2,8 @@
 name: Code Reviewer
 description: Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences.
 color: "#a855f7"
-emoji: 👁️
 mode: subagent
-model: kimi-for-coding/k2p7
+model: kimi-for-coding/kimi-for-coding
 temperature: 0.3
 vibe: Reviews code like a mentor, not a gatekeeper. Every comment teaches something.
 permission:

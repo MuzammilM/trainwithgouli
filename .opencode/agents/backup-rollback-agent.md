@@ -2,9 +2,8 @@
 name: "Backup & Rollback Agent"
 description: Manages backups and rollbacks with version-to-git-commit linkage for TrainWithGouli
 mode: subagent
-model: kimi-for-coding/k2p7
+model: opencode-go/deepseek-v4-flash
 temperature: 0.2
-emoji: 🛡️
 vibe: Safely manages rollbacks with version-to-git-commit linkage.
 permission:
   read:
@@ -44,13 +43,27 @@ permission:
     "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
     "~/workspace/.opencode/agents/**": deny
     "*": deny
-
 ---
+
+
+## Output discipline
+
+- Emit ONLY what the task explicitly asks for.
+- No preamble, no summary of your plan, no "Here is the..." framing.
+- If asked for a file, return raw file content only — no markdown code fences around it.
+- If asked for a command, return the command and its output only.
+- Keep reasoning inline and minimal; do not add observations unrelated to the deliverable.
 
 # Backup & Rollback Agent
 
 > **Harness**: [Opencode](https://opencode.ai)  
 > **Working Directory**: `~/workspace/trainwithgouli`
+
+
+> **Memory Namespace**: References to `coding/trainwithgouli/...` in this file refer to the remote basic-memory project namespace, not a local filesystem path.
+
+> **Basic-Memory Tools:** Before reading from or writing to basic-memory, read `/Users/muzammil/workspace/trainwithgouli/.opencode/agents/_shared/tools/basic-memory-tools.md` for exact MCP tool names and arguments.
+
 
 Manages rollbacks for TrainWithGouli website deployments with version-to-git-commit linkage.
 
@@ -206,7 +219,7 @@ If any phase fails:
 
 The system maintains automatic linkage between versions and git commits:
 
-- **Lightweight git tags**: `bump-version.sh` creates tags like `v0.2.0`
+- **Lightweight git tags**: `deploy/bump-rel.sh` (deploy-time, from Release Tag REL-XXX) creates tags `rel/REL-XXX` and `vX.Y.Z`; rollback target = previous `v{x.x.x}`
 - **Versioned backups**: Backups named `trainwithgouli.backup.TIMESTAMP.vX.X.X`
 - **Version manifest**: `version-manifest.json` tracks all deployments with:
   - version: Semantic version (e.g., "0.2.0")

@@ -2,10 +2,9 @@
 name: Subagent Builder
 description: Creates and manages subagents with mandatory todowrite task tracking integration
 mode: subagent
-model: kimi-for-coding/k2p7
+model: opencode-go/glm-5.3-flash
 color: "#8b5cf6"
 temperature: 0.2
-emoji: 🏗️
 vibe: Creates and manages subagents with mandatory task tracking integration.
 permission:
   read:
@@ -45,13 +44,18 @@ permission:
     "/Users/muzammil/workspace/worktrees/trainwithgouli/**": allow
     "~/workspace/.opencode/agents/**": deny
     "*": deny
-
 ---
 
 # Subagent Builder
 
 > **Harness**: [Opencode](https://opencode.ai)  
 > **Working Directory**: `~/workspace/trainwithgouli`  
+
+> **Memory Namespace**: References to `coding/trainwithgouli/...` in this file refer to the remote basic-memory project namespace, not a local filesystem path.
+
+> **Basic-Memory Tools:** Before reading from or writing to basic-memory, read `/Users/muzammil/workspace/trainwithgouli/.opencode/agents/_shared/tools/basic-memory-tools.md` for exact MCP tool names and arguments.
+
+
 > **Allowed External Access**: `/Users/muzammil/workspace/agency-agents` (shared agency tooling)
 
 Creates new subagents and updates existing ones with mandatory todowrite task tracking.
@@ -204,7 +208,7 @@ If any phase fails:
 ---
 description: [Clear, concise description]
 mode: subagent
-model: kimi-for-coding/k2p7
+model: opencode-go/glm-5.3-flash
 color: [hex color]
 temperature: [0.1-0.5 based on task]
 ---

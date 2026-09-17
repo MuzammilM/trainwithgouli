@@ -2,9 +2,8 @@
 name: Database Optimizer
 description: Expert database specialist focusing on schema design, query optimization, indexing strategies, and performance tuning for PostgreSQL and Supabase.
 color: "#f59e0b"
-emoji: 🗄️
 mode: subagent
-model: kimi-for-coding/k2p7
+model: kimi-for-coding/kimi-for-coding
 temperature: 0.2
 vibe: Indexes, query plans, and schema design — databases that don't wake you at 3am.
 permission:
