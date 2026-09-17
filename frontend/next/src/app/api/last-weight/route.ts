@@ -1,25 +1,22 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const exerciseId = searchParams.get('exerciseId')
   if (!exerciseId) return NextResponse.json({ weight: null })
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ weight: null })
 
-  const { data } = await supabase
-    .from('workout_sets')
-    .select('weight, created_at, workout_days!inner(user_id)')
-    .eq('exercise_id', exerciseId)
-    .eq('workout_days.user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
-
-  return NextResponse.json({ weight: data?.weight ?? null })
+  const pb = await serverClient()
+  try {
+    const set = await pb.collection('workout_sets').getFirstListItem(
+      `exercise_id = "${exerciseId}" && workout_day_id.user_id = "${user.id}"`,
+      { sort: '-created' },
+    )
+    return NextResponse.json({ weight: set?.weight ?? null })
+  } catch {
+    return NextResponse.json({ weight: null })
+  }
 }

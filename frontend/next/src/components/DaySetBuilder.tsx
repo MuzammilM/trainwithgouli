@@ -3,12 +3,12 @@
 import { useState } from 'react'
 
 interface Exercise {
-  id: number
+  id: string
   name: string
 }
 
 interface SetRow {
-  exercise_id: number
+  exercise_id: string
   weight: string
   reps: string
   sets: string
@@ -20,7 +20,7 @@ export function DaySetBuilder({
   initialRows,
 }: {
   exercises: Exercise[]
-  initialRows?: { exercise_id: number; weight?: number; reps?: number; sets?: number; notes?: string | null }[]
+  initialRows?: { exercise_id: string; weight?: number; reps?: number; sets?: number; notes?: string | null }[]
 }) {
   const [rows, setRows] = useState<SetRow[]>(
     initialRows?.length
@@ -31,11 +31,11 @@ export function DaySetBuilder({
           sets: r.sets?.toString() ?? '1',
           notes: r.notes ?? '',
         }))
-      : [{ exercise_id: 0, weight: '', reps: '', sets: '1', notes: '' }]
+      : [{ exercise_id: "", weight: '', reps: '', sets: '1', notes: '' }]
   )
 
   function addRow() {
-    setRows([...rows, { exercise_id: 0, weight: '', reps: '', sets: '1', notes: '' }])
+    setRows([...rows, { exercise_id: "", weight: '', reps: '', sets: '1', notes: '' }])
   }
 
   function removeRow(index: number) {

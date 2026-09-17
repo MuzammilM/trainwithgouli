@@ -1,6 +1,9 @@
 import Link from 'next/link'
-import { login } from '@/lib/actions/auth'
-import { AuthSubmitButton } from '@/components/AuthSubmitButton'
+import { GoogleButton } from '@/components/GoogleButton'
+
+const ERROR_MESSAGES: Record<string, string> = {
+  'not-registered': "This email isn't registered with a coach yet.",
+}
 
 export default async function LoginPage({
   searchParams,
@@ -8,6 +11,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>
 }) {
   const { error } = await searchParams
+  const message = error ? (ERROR_MESSAGES[error] || 'Sign-in failed. Please try again.') : null
   return (
     <div className="flex-1 flex flex-col">
       <header className="border-b-2 border-[var(--border)] bg-[var(--surface)]">
@@ -37,50 +41,17 @@ export default async function LoginPage({
             <p className="font-mono text-sm text-[var(--muted)] mb-8">
               Enter the logbook.
             </p>
-            {error ? (
+            {message ? (
               <p
                 role="alert"
                 className="mb-6 border-2 border-[var(--accent)] bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] px-3 py-2.5 font-mono text-sm"
               >
-                {error}
+                {message}
               </p>
             ) : null}
-            <form action={login} className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wide mb-2">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wide mb-2">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  minLength={6}
-                  autoComplete="current-password"
-                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
-                />
-              </div>
-              <AuthSubmitButton label="Log in" pendingLabel="Logging in…" />
-            </form>
+            <GoogleButton />
             <p className="mt-6 text-sm font-mono text-[var(--muted)]">
-              No account?{' '}
-              <Link href="/signup" className="font-bold text-[var(--foreground)] hover:text-[var(--accent)]">
-                Sign up
-              </Link>
-              .
+              Access is invite-only — ask your coach to add you.
             </p>
           </div>
         </div>

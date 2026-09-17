@@ -116,8 +116,7 @@ REMOTE_TAG="${REMOTE_IMAGE_NAME}:frontend-v${CURRENT_VERSION}"
 REMOTE_LATEST="${REMOTE_IMAGE_NAME}:frontend-latest"
 
 # Build args defaults (replace with real values in CI or via env)
-NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-https://your-project.supabase.co}"
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-your-publishable-key}"
+NEXT_PUBLIC_POCKETBASE_URL="${NEXT_PUBLIC_POCKETBASE_URL:-https://pocketbase.mzm.co.in}"
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BLUE}  TrainWithGouli Next.js Docker Build${NC}"
@@ -134,8 +133,7 @@ PLATFORM="${DOCKER_DEFAULT_PLATFORM:-linux/amd64}"
 echo -e "${BLUE}Building image with ${ENGINE} (platform: ${PLATFORM})...${NC}"
 "${ENGINE}" build \
     --platform "${PLATFORM}" \
-    --build-arg NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL}" \
-    --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}" \
+    --build-arg NEXT_PUBLIC_POCKETBASE_URL="${NEXT_PUBLIC_POCKETBASE_URL}" \
     -t "${LOCAL_TAG}" \
     -t "${LOCAL_LATEST}" \
     -t "${REMOTE_TAG}" \

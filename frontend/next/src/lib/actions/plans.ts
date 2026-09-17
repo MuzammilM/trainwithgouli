@@ -2,19 +2,13 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
-
-function assertAuthenticated(userId: string | undefined): asserts userId is string {
-  if (!userId) throw new Error('Unauthorized')
-}
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 
 export async function createPlan(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  assertAuthenticated(user?.id)
+  const user = await getAuthUser()
+  if (!user) throw new Error('Unauthorized')
 
+  const pb = await serverClient()
   const name = (formData.get('name') as string).trim()
   const isPublic = formData.get('is_public') === 'on'
   const exerciseIds = formData.getAll('exercise_ids[]') as string[]
@@ -22,40 +16,26 @@ export async function createPlan(formData: FormData): Promise<void> {
   const reps = formData.getAll('reps[]') as string[]
   const restSeconds = formData.getAll('rest_seconds[]') as string[]
 
-  const { data: plan, error } = await supabase
-    .from('workout_plans')
-    .insert({ name, is_public: isPublic, created_by: user.id })
-    .select()
-    .single()
+  const plan = await pb.collection('workout_plans').create({
+    name,
+    is_public: isPublic,
+    created_by: user.id,
+  })
 
-  if (error || !plan) throw new Error(error?.message || 'Failed to create plan')
-
-  const planExercises = exerciseIds
-    .map((exerciseId, index) => ({
-      plan_id: plan.id,
-      exercise_id: Number(exerciseId),
-      order_index: index,
-      sets: Number(sets[index]) || null,
-      reps: Number(reps[index]) || null,
-      rest_seconds: Number(restSeconds[index]) || null,
-    }))
-    .filter((pe) => pe.exercise_id)
-
-  if (planExercises.length > 0) {
-    const { error: insertError } = await supabase.from('plan_exercises').insert(planExercises)
-    if (insertError) throw new Error(insertError.message)
-  }
+  await insertPlanExercises(pb, plan.id, exerciseIds, sets, reps, restSeconds)
 
   revalidatePath('/plans')
   redirect('/plans')
 }
 
 export async function updatePlan(id: string, formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  assertAuthenticated(user?.id)
+  const user = await getAuthUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const pb = await serverClient()
+  const plan = await pb.collection('workout_plans').getOne(id)
+  const canEdit = user.role === 'coach' || plan.created_by === user.id
+  if (!canEdit) throw new Error('Forbidden')
 
   const name = (formData.get('name') as string).trim()
   const isPublic = formData.get('is_public') === 'on'
@@ -64,19 +44,49 @@ export async function updatePlan(id: string, formData: FormData): Promise<void> 
   const reps = formData.getAll('reps[]') as string[]
   const restSeconds = formData.getAll('rest_seconds[]') as string[]
 
-  const { error } = await supabase
-    .from('workout_plans')
-    .update({ name, is_public: isPublic })
-    .eq('id', id)
+  await pb.collection('workout_plans').update(id, { name, is_public: isPublic })
 
-  if (error) throw new Error(error.message)
+  const existing = await pb.collection('plan_exercises').getFullList({
+    filter: `plan_id = "${id}"`,
+  })
+  for (const pe of existing) {
+    await pb.collection('plan_exercises').delete(pe.id)
+  }
 
-  await supabase.from('plan_exercises').delete().eq('plan_id', id)
+  await insertPlanExercises(pb, id, exerciseIds, sets, reps, restSeconds)
 
-  const planExercises = exerciseIds
+  revalidatePath('/plans')
+  redirect('/plans')
+}
+
+export async function deletePlan(id: string): Promise<void> {
+  const user = await getAuthUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const pb = await serverClient()
+  const plan = await pb.collection('workout_plans').getOne(id)
+  const canEdit = user.role === 'coach' || plan.created_by === user.id
+  if (!canEdit) throw new Error('Forbidden')
+
+  await pb.collection('workout_plans').delete(id)
+
+  revalidatePath('/plans')
+}
+
+type PbClient = Awaited<ReturnType<typeof serverClient>>
+
+async function insertPlanExercises(
+  pb: PbClient,
+  planId: string,
+  exerciseIds: string[],
+  sets: string[],
+  reps: string[],
+  restSeconds: string[],
+): Promise<void> {
+  const rows = exerciseIds
     .map((exerciseId, index) => ({
-      plan_id: Number(id),
-      exercise_id: Number(exerciseId),
+      plan_id: planId,
+      exercise_id: exerciseId,
       order_index: index,
       sets: Number(sets[index]) || null,
       reps: Number(reps[index]) || null,
@@ -84,24 +94,7 @@ export async function updatePlan(id: string, formData: FormData): Promise<void> 
     }))
     .filter((pe) => pe.exercise_id)
 
-  if (planExercises.length > 0) {
-    const { error: insertError } = await supabase.from('plan_exercises').insert(planExercises)
-    if (insertError) throw new Error(insertError.message)
+  for (const row of rows) {
+    await pb.collection('plan_exercises').create(row)
   }
-
-  revalidatePath('/plans')
-  redirect('/plans')
-}
-
-export async function deletePlan(id: string): Promise<void> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  assertAuthenticated(user?.id)
-
-  const { error } = await supabase.from('workout_plans').delete().eq('id', id)
-  if (error) throw new Error(error.message)
-
-  revalidatePath('/plans')
 }

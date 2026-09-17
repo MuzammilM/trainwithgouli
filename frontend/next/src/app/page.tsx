@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
+import { getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 
 const SECTIONS = [
@@ -21,29 +21,11 @@ const SECTIONS = [
 ]
 
 export default async function HomePage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  let isAdmin = false
-  let profile = null
-  if (user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('role, display_name')
-      .eq('id', user.id)
-      .single()
-    profile = data
-    isAdmin = data?.role === 'admin'
-  }
+  const user = await getAuthUser()
 
   return (
     <>
-      <Nav
-        user={user ? { id: user.id, email: user.email, display_name: profile?.display_name } : null}
-        isAdmin={isAdmin}
-      />
+      <Nav user={user} />
       <main className="flex-1 w-full">
         <section className="relative overflow-hidden border-b-2 border-[var(--border)]">
           <img
@@ -84,7 +66,7 @@ export default async function HomePage() {
               ) : (
                 <>
                   <Link
-                    href="/signup"
+                    href="/login"
                     className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm no-underline hover:bg-[var(--accent-strong)]"
                   >
                     Start training

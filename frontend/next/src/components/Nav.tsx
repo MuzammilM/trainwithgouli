@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { usePathname } from 'next/navigation'
+import { logout } from '@/lib/actions/auth'
 
 const LINKS = [
   { href: '/exercises', label: 'Exercises' },
@@ -30,19 +30,10 @@ function NavLinks({ className }: { className?: string }) {
 
 export function Nav({
   user,
-  isAdmin,
 }: {
-  user: { id: string; email?: string; display_name?: string | null } | null
-  isAdmin: boolean
+  user: { id: string; email?: string; name?: string; role?: string } | null
 }) {
-  const router = useRouter()
-  const supabase = createClient()
-
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
+  const isCoach = user?.role === 'coach'
 
   return (
     <nav aria-label="Primary" className="sticky top-0 z-40 border-b-2 border-[var(--border)] bg-[var(--surface)]">
@@ -53,26 +44,22 @@ export function Nav({
           {user ? (
             <div className="flex items-center gap-3 min-w-0">
               <span className="hidden sm:block font-mono text-xs text-[var(--muted)] truncate">
-                {user.display_name || user.email}
-                {isAdmin ? ' [admin]' : ''}
+                {user.name || user.email}
+                {isCoach ? ' [coach]' : ''}
               </span>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center justify-center min-h-11 px-3 border-2 border-[var(--border)] font-bold uppercase text-xs hover:border-[var(--accent)] hover:text-[var(--accent)]"
-              >
-                Log out
-              </button>
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center min-h-11 px-3 border-2 border-[var(--border)] font-bold uppercase text-xs hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                >
+                  Log out
+                </button>
+              </form>
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <Link href="/login" className="nav-link text-xs md:text-sm font-bold uppercase py-3.5 md:py-1">
                 Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex items-center justify-center min-h-11 px-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-xs no-underline hover:bg-[var(--accent-strong)]"
-              >
-                Sign up
               </Link>
             </div>
           )}

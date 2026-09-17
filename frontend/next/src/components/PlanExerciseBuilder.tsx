@@ -3,19 +3,19 @@
 import { useState } from 'react'
 
 interface Exercise {
-  id: number
+  id: string
   name: string
 }
 
-export function PlanExerciseBuilder({ exercises, initialRows }: { exercises: Exercise[]; initialRows?: { exercise_id: number; sets?: number; reps?: number; rest_seconds?: number }[] }) {
+export function PlanExerciseBuilder({ exercises, initialRows }: { exercises: Exercise[]; initialRows?: { exercise_id: string; sets?: number; reps?: number; rest_seconds?: number }[] }) {
   const [rows, setRows] = useState(
     initialRows?.length
       ? initialRows
-      : [{ exercise_id: 0, sets: undefined, reps: undefined, rest_seconds: undefined }]
+      : [{ exercise_id: "", sets: undefined, reps: undefined, rest_seconds: undefined }]
   )
 
   function addRow() {
-    setRows([...rows, { exercise_id: 0, sets: undefined, reps: undefined, rest_seconds: undefined }])
+    setRows([...rows, { exercise_id: "", sets: undefined, reps: undefined, rest_seconds: undefined }])
   }
 
   function removeRow(index: number) {

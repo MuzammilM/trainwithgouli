@@ -1,19 +1,16 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { PlanExerciseBuilder } from '@/components/PlanExerciseBuilder'
 import { createPlan } from '@/lib/actions/plans'
 
 export default async function NewPlanPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) {
     return (
       <>
-        <Nav user={null} isAdmin={false} />
+        <Nav user={null} />
         <main className="max-w-5xl mx-auto px-4 py-12">
           <p className="font-mono">Please <Link href="/login" className="font-bold hover:text-[var(--accent)]">log in</Link>.</p>
         </main>
@@ -21,14 +18,15 @@ export default async function NewPlanPage() {
     )
   }
 
-  const [{ data: profile }, { data: exercises }] = await Promise.all([
-    supabase.from('profiles').select('role, display_name').eq('id', user.id).single(),
-    supabase.from('exercises').select('id, name').order('name'),
-  ])
+  const pb = await serverClient()
+  const exercises = (await pb.collection('exercises').getFullList({
+    sort: 'name',
+    fields: 'id,name',
+  })) as unknown as { id: string; name: string }[]
 
   return (
     <>
-      <Nav user={{ id: user.id, email: user.email, display_name: profile?.display_name }} isAdmin={profile?.role === 'admin'} />
+      <Nav user={user} />
       <main className="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/plans" className="font-mono text-sm hover:text-[var(--accent)]">← Back</Link>

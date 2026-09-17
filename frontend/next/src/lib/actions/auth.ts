@@ -1,47 +1,59 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
+import PocketBase from 'pocketbase'
+import { serviceClient } from '@/lib/pocketbase/admin'
+import { PB_AUTH_COOKIE } from '@/lib/pocketbase/server'
 
-function assertAuthenticated(userId: string | undefined): asserts userId is string {
-  if (!userId) throw new Error('Unauthorized')
-}
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // ~30 days
 
-export async function login(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
+/**
+ * Validates an OAuth token produced by the client-side Google sign-in and,
+ * if the user passes the invite allowlist, sets the httpOnly session cookie.
+ * Allowlist: role === 'coach' OR email exists in the `clients` collection.
+ */
+export async function setSession(token: string): Promise<void> {
+  const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL || 'https://pocketbase.mzm.co.in')
+  pb.authStore.save(token)
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`)
+  let allowed = false
+  try {
+    await pb.collection('users').authRefresh()
+    const record = pb.authStore.record
+    if (record) {
+      if (record.role === 'coach') {
+        allowed = true
+      } else {
+        const admin = await serviceClient()
+        const clients = await admin.collection('clients').getFullList({
+          filter: `email = "${record.email}"`,
+          limit: 1,
+        })
+        allowed = clients.length > 0
+      }
+    }
+  } catch {
+    allowed = false
+  }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
-}
+  const cookieStore = await cookies()
+  if (!allowed) {
+    cookieStore.delete(PB_AUTH_COOKIE)
+    redirect('/login?error=not-registered')
+  }
 
-export async function signup(formData: FormData): Promise<void> {
-  const supabase = await createClient()
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const displayName = formData.get('display_name') as string
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { display_name: displayName || email },
-    },
+  cookieStore.set(PB_AUTH_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: COOKIE_MAX_AGE,
   })
-  if (error) redirect(`/signup?error=${encodeURIComponent(error.message)}`)
-
-  revalidatePath('/', 'layout')
   redirect('/')
 }
 
 export async function logout(): Promise<void> {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  revalidatePath('/', 'layout')
+  const cookieStore = await cookies()
+  cookieStore.delete(PB_AUTH_COOKIE)
   redirect('/login')
 }

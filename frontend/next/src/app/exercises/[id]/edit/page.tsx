@@ -1,20 +1,17 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { updateExercise } from '@/lib/actions/exercises'
 
 export default async function EditExercisePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) {
     return (
       <>
-        <Nav user={null} isAdmin={false} />
+        <Nav user={null} />
         <main className="max-w-5xl mx-auto px-4 py-12">
           <p className="font-mono">Please <Link href="/login" className="font-bold hover:text-[var(--accent)]">log in</Link>.</p>
         </main>
@@ -22,19 +19,17 @@ export default async function EditExercisePage({ params }: { params: Promise<{ i
     )
   }
 
-  const [{ data: profile }, { data: exercise }] = await Promise.all([
-    supabase.from('profiles').select('role, display_name').eq('id', user.id).single(),
-    supabase.from('exercises').select('*').eq('id', id).single(),
-  ])
+  const pb = await serverClient()
+  const exercise = await pb.collection('exercises').getOne(id).catch(() => null)
 
   if (!exercise) notFound()
 
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = user.role === 'coach'
   const canEdit = isAdmin || exercise.created_by === user.id
   if (!canEdit) {
     return (
       <>
-        <Nav user={{ id: user.id, email: user.email, display_name: profile?.display_name }} isAdmin={isAdmin} />
+        <Nav user={user} />
         <main className="max-w-5xl mx-auto px-4 py-12">
           <p className="font-mono text-[var(--accent)]">You do not have permission to edit this exercise.</p>
         </main>
@@ -46,7 +41,7 @@ export default async function EditExercisePage({ params }: { params: Promise<{ i
 
   return (
     <>
-      <Nav user={{ id: user.id, email: user.email, display_name: profile?.display_name }} isAdmin={isAdmin} />
+      <Nav user={user} />
       <main className="flex-1 max-w-2xl mx-auto px-4 py-12 w-full">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/exercises" className="font-mono text-sm hover:text-[var(--accent)]">← Back</Link>

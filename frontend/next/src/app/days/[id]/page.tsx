@@ -1,21 +1,28 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { DaySetBuilder } from '@/components/DaySetBuilder'
 import { updateDay, deleteDay } from '@/lib/actions/days'
 
+type WorkoutSet = {
+  id: string
+  exercise_id: string
+  weight: number
+  reps: number
+  sets: number
+  notes: string | null
+  expand?: { exercise?: { name: string } }
+}
+
 export default async function DayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) {
     return (
       <>
-        <Nav user={null} isAdmin={false} />
+        <Nav user={null} />
         <main className="max-w-5xl mx-auto px-4 py-12">
           <p className="font-mono">Please <Link href="/login" className="font-bold hover:text-[var(--accent)]">log in</Link>.</p>
         </main>
@@ -23,37 +30,39 @@ export default async function DayPage({ params }: { params: Promise<{ id: string
     )
   }
 
-  const [{ data: profile }, { data: day }] = await Promise.all([
-    supabase.from('profiles').select('role, display_name').eq('id', user.id).single(),
-    supabase
-      .from('workout_days')
-      .select('*, profiles(display_name), workout_sets(*, exercises(name))')
-      .eq('id', id)
-      .single(),
-  ])
+  const pb = await serverClient()
+  const day = await pb.collection('workout_days').getOne(id).catch(() => null)
 
   if (!day) notFound()
 
-  const isAdmin = profile?.role === 'admin'
+  const [daySets, exercises, owner] = await Promise.all([
+    pb.collection('workout_sets').getFullList<WorkoutSet>({
+      filter: `workout_day_id = "${id}"`,
+      expand: 'exercise',
+    }),
+    pb.collection('exercises').getFullList({ sort: 'name', fields: 'id,name' }) as unknown as { id: string; name: string }[],
+    pb.collection('users').getOne(day.user_id, { fields: 'id,name,email' }).catch(() => null),
+  ])
+
+  const isAdmin = user.role === 'coach'
   const isOwner = day.user_id === user.id
   const canEdit = isAdmin || isOwner
 
-  const { data: exercises } = await supabase.from('exercises').select('id, name').order('name')
+  const ownerName = owner ? (owner.name || owner.email) : 'Unknown'
 
-  const initialRows =
-    day.workout_sets?.map((set: any) => ({
-      exercise_id: set.exercise_id,
-      weight: set.weight,
-      reps: set.reps,
-      sets: set.sets,
-      notes: set.notes,
-    })) || []
+  const initialRows = daySets.map((set) => ({
+    exercise_id: set.exercise_id,
+    weight: set.weight,
+    reps: set.reps,
+    sets: set.sets,
+    notes: set.notes,
+  }))
 
   const update = updateDay.bind(null, id)
 
   return (
     <>
-      <Nav user={{ id: user.id, email: user.email, display_name: profile?.display_name }} isAdmin={isAdmin} />
+      <Nav user={user} />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/days" className="font-mono text-sm hover:text-[var(--accent)]">← Back</Link>
@@ -62,13 +71,13 @@ export default async function DayPage({ params }: { params: Promise<{ id: string
 
         {!canEdit && (
           <div className="mb-6 border-2 border-[var(--border)] p-4 bg-[var(--surface)]">
-            <p className="font-mono text-sm">Logged by {day.profiles?.display_name || 'Unknown'}. Read-only.</p>
+            <p className="font-mono text-sm">Logged by {ownerName}. Read-only.</p>
             {day.notes && <p className="font-mono mt-2">{day.notes}</p>}
-            {day.workout_sets && day.workout_sets.length > 0 && (
+            {daySets.length > 0 && (
               <ul className="font-mono text-sm mt-2 space-y-1">
-                {day.workout_sets.map((set: any) => (
+                {daySets.map((set) => (
                   <li key={set.id}>
-                    {set.exercises?.name}: {set.weight} × {set.reps} @ {set.sets} set{set.sets === 1 ? '' : 's'}
+                    {set.expand?.exercise?.name}: {set.weight} × {set.reps} @ {set.sets} set{set.sets === 1 ? '' : 's'}
                   </li>
                 ))}
               </ul>

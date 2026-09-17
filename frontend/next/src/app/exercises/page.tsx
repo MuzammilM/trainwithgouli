@@ -1,19 +1,16 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { YouTubeEmbed } from '@/components/YouTubeEmbed'
 import { deleteExercise } from '@/lib/actions/exercises'
 
 export default async function ExercisesPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) {
     return (
       <>
-        <Nav user={null} isAdmin={false} />
+        <Nav user={null} />
         <main className="max-w-5xl mx-auto px-4 py-12">
           <p className="font-mono">
             Please{' '}
@@ -25,19 +22,16 @@ export default async function ExercisesPage() {
     )
   }
 
-  const [{ data: profile }, { data: exercises }] = await Promise.all([
-    supabase.from('profiles').select('role, display_name').eq('id', user.id).single(),
-    supabase.from('exercises').select('*').order('name', { ascending: true }),
-  ])
+  const pb = await serverClient()
+  const exercises = await pb.collection('exercises').getFullList({
+    sort: 'name',
+  })
 
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = user.role === 'coach'
 
   return (
     <>
-      <Nav
-        user={{ id: user.id, email: user.email, display_name: profile?.display_name }}
-        isAdmin={isAdmin}
-      />
+      <Nav user={user} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-black uppercase tracking-tighter">Exercises</h1>

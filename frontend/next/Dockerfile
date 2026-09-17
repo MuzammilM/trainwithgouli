@@ -2,7 +2,7 @@
 # Dockerfile — TrainWithGouli Next.js Frontend
 # ------------------------------------------------------------------------------
 # Multi-stage build using Node.js on Alpine Linux.
-# Accepts build args for public Supabase configuration.
+# Accepts build args for public PocketBase configuration.
 # Runs the production Next.js standalone server on port 3000.
 # ------------------------------------------------------------------------------
 
@@ -29,11 +29,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Public environment variables required at build time
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_POCKETBASE_URL
 
-ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+ENV NEXT_PUBLIC_POCKETBASE_URL=${NEXT_PUBLIC_POCKETBASE_URL:-https://pocketbase.mzm.co.in}
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build

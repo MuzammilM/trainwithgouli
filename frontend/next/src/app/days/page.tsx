@@ -1,17 +1,25 @@
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
+import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 
+type WorkoutSet = {
+  id: string
+  workout_day_id: string
+  exercise_id: string
+  weight: number
+  reps: number
+  sets: number
+  notes: string | null
+  expand?: { exercise?: { name: string } }
+}
+
 export default async function DaysPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) {
     return (
       <>
-        <Nav user={null} isAdmin={false} />
+        <Nav user={null} />
         <main className="max-w-5xl mx-auto px-4 py-12">
           <p className="font-mono">
             Please{' '}
@@ -23,22 +31,33 @@ export default async function DaysPage() {
     )
   }
 
-  const [{ data: profile }, { data: days }] = await Promise.all([
-    supabase.from('profiles').select('role, display_name').eq('id', user.id).single(),
-    supabase
-      .from('workout_days')
-      .select('*, profiles(display_name), workout_sets(*, exercises(name))')
-      .order('date', { ascending: false }),
+  const pb = await serverClient()
+  const [days, sets] = await Promise.all([
+    pb.collection('workout_days').getFullList({ sort: '-date' }),
+    pb.collection('workout_sets').getFullList<WorkoutSet>({ expand: 'exercise' }),
   ])
 
-  const isAdmin = profile?.role === 'admin'
+  const setsByDay = new Map<string, WorkoutSet[]>()
+  for (const set of sets) {
+    const list = setsByDay.get(set.workout_day_id) || []
+    list.push(set)
+    setsByDay.set(set.workout_day_id, list)
+  }
+
+  const userIds = [...new Set(days.map((day) => day.user_id))]
+  const users = userIds.length
+    ? await pb.collection('users').getFullList({
+        filter: userIds.map((id) => `id = "${id}"`).join(' || '),
+        fields: 'id,name,email',
+      })
+    : []
+  const userNames = new Map(users.map((u) => [u.id, u.name || u.email]))
+
+  const isAdmin = user.role === 'coach'
 
   return (
     <>
-      <Nav
-        user={{ id: user.id, email: user.email, display_name: profile?.display_name }}
-        isAdmin={isAdmin}
-      />
+      <Nav user={user} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-black uppercase tracking-tighter">Workout days</h1>
@@ -52,31 +71,34 @@ export default async function DaysPage() {
 
         {days && days.length > 0 ? (
           <div className="space-y-6">
-            {days.map((day) => (
-              <article key={day.id} className="border-2 border-[var(--border)] bg-[var(--surface)] p-4">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div>
-                    <Link href={`/days/${day.id}`} className="text-2xl font-black uppercase no-underline hover:text-[var(--accent)]">
-                      {day.date}
-                    </Link>
-                    <p className="font-mono text-sm text-[var(--muted)]">
-                      {day.profiles?.display_name || 'Unknown'}
-                      {day.workout_sets && ` · ${day.workout_sets.length} set${day.workout_sets.length === 1 ? '' : 's'}`}
-                    </p>
+            {days.map((day) => {
+              const daySets = setsByDay.get(day.id) || []
+              return (
+                <article key={day.id} className="border-2 border-[var(--border)] bg-[var(--surface)] p-4">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <Link href={`/days/${day.id}`} className="text-2xl font-black uppercase no-underline hover:text-[var(--accent)]">
+                        {day.date}
+                      </Link>
+                      <p className="font-mono text-sm text-[var(--muted)]">
+                        {userNames.get(day.user_id) || 'Unknown'}
+                        {daySets.length > 0 && ` · ${daySets.length} set${daySets.length === 1 ? '' : 's'}`}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                {day.notes && <p className="font-mono text-sm mb-3">{day.notes}</p>}
-                {day.workout_sets && day.workout_sets.length > 0 && (
-                  <ul className="font-mono text-sm space-y-1">
-                    {day.workout_sets.map((set: any) => (
-                      <li key={set.id}>
-                        {set.exercises?.name}: {set.weight} × {set.reps} @ {set.sets} set{set.sets === 1 ? '' : 's'}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            ))}
+                  {day.notes && <p className="font-mono text-sm mb-3">{day.notes}</p>}
+                  {daySets.length > 0 && (
+                    <ul className="font-mono text-sm space-y-1">
+                      {daySets.map((set) => (
+                        <li key={set.id}>
+                          {set.expand?.exercise?.name}: {set.weight} × {set.reps} @ {set.sets} set{set.sets === 1 ? '' : 's'}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              )
+            })}
           </div>
         ) : (
           <p className="font-mono text-[var(--muted)]">No workout days logged yet.</p>
