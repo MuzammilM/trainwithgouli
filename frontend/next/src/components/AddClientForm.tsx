@@ -85,7 +85,7 @@ export function AddClientForm() {
           <ol className="list-decimal list-inside space-y-0.5">
             <li>Open your Google Sheet → Share</li>
             <li>
-              Add <span className="text-[var(--foreground)]">{SA_EMAIL}</span> as <strong>Viewer</strong>
+              Add <span className="text-[var(--foreground)]">{SA_EMAIL}</span> as <strong>Editor</strong>
             </li>
             <li>Re-submit the form</li>
           </ol>
