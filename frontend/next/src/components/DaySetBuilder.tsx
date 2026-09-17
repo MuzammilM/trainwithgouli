@@ -63,7 +63,7 @@ export function DaySetBuilder({
       <button
         type="button"
         onClick={addRow}
-        className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm hover:bg-[var(--accent)] hover:text-white"
+        className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
       >
         + Add set
       </button>
@@ -174,7 +174,7 @@ function SetRowFields({
         <button
           type="button"
           onClick={() => onRemove(index)}
-          className="w-full px-2 py-2 border-2 border-[var(--border)] font-bold uppercase text-xs hover:bg-[var(--accent)] hover:text-white"
+          className="w-full px-2 py-2 border-2 border-[var(--border)] font-bold uppercase text-xs hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
         >
           ×
         </button>

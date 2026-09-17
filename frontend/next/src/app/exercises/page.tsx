@@ -59,14 +59,14 @@ export default async function ExercisesPage() {
                     <div className="flex gap-2">
                       <Link
                         href={`/exercises/${exercise.id}/edit`}
-                        className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase no-underline hover:bg-[var(--accent)] hover:text-white"
+                        className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase no-underline hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
                       >
                         Edit
                       </Link>
                       <form action={deleteExercise.bind(null, String(exercise.id))}>
                         <button
                           type="submit"
-                          className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase hover:bg-[var(--accent)] hover:text-white"
+                          className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
                         >
                           Delete
                         </button>

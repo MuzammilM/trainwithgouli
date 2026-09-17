@@ -114,7 +114,7 @@ export default async function DayPage({ params }: { params: Promise<{ id: string
             <div className="flex gap-4">
               <Link
                 href="/days"
-                className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm no-underline hover:bg-[var(--accent)] hover:text-white"
+                className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm no-underline hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
               >
                 Cancel
               </Link>
@@ -131,7 +131,7 @@ export default async function DayPage({ params }: { params: Promise<{ id: string
           <form action={deleteDay.bind(null, id)} className="mt-4 flex justify-end">
             <button
               type="submit"
-              className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm hover:bg-[var(--accent)] hover:text-white"
+              className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
             >
               Delete day
             </button>

@@ -96,7 +96,7 @@ export default async function EditPlanPage({ params }: { params: Promise<{ id: s
           <div className="flex gap-4">
             <Link
               href="/plans"
-              className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm no-underline hover:bg-[var(--accent)] hover:text-white"
+              className="px-4 py-2 border-2 border-[var(--border)] font-bold uppercase text-sm no-underline hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
             >
               Cancel
             </Link>

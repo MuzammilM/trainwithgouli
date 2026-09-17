@@ -64,14 +64,14 @@ export default async function PlansPage() {
                     <div className="flex gap-2">
                       <Link
                         href={`/plans/${plan.id}/edit`}
-                        className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase no-underline hover:bg-[var(--accent)] hover:text-white"
+                        className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase no-underline hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
                       >
                         Edit
                       </Link>
                       <form action={deletePlan.bind(null, String(plan.id))}>
                         <button
                           type="submit"
-                          className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase hover:bg-[var(--accent)] hover:text-white"
+                          className="px-2 py-1 border-2 border-[var(--border)] text-xs font-bold uppercase hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
                         >
                           Delete
                         </button>

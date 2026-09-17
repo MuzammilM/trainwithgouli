@@ -3,50 +3,77 @@ import { login } from '@/lib/actions/auth'
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex-1 flex flex-col">
       <header className="border-b-2 border-[var(--border)] bg-[var(--surface)]">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <Link href="/" className="text-2xl font-black uppercase tracking-tighter no-underline hover:text-[var(--accent)]">
-            TrainWithGouli
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-end">
+          <Link
+            href="/"
+            className="font-display text-2xl lowercase tracking-tight no-underline hover:text-[var(--foreground)]"
+          >
+            trainwithgouli<span className="text-[var(--accent)]">.</span>
           </Link>
         </div>
       </header>
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md border-2 border-[var(--border)] bg-[var(--surface)] p-6 md:p-8">
-          <h1 className="text-3xl font-black uppercase mb-6">Log in</h1>
-          <form action={login} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-bold uppercase mb-1">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-bold uppercase mb-1">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full px-4 py-3 border-2 border-[var(--border)] bg-[var(--foreground)] text-[var(--background)] font-black uppercase hover:bg-[var(--accent)]"
-            >
-              Log in
-            </button>
-          </form>
-          <p className="mt-4 text-sm font-mono">
-            No account?{' '}
-            <Link href="/signup" className="font-bold hover:text-[var(--accent)]">Sign up</Link>.
+      <main className="flex-1 grid lg:grid-cols-2">
+        <div className="hidden lg:flex flex-col justify-between border-r-2 border-[var(--border)] p-12">
+          <p className="font-mono text-sm text-[var(--muted)] max-w-sm">
+            Back under the bar. Every session logged is a number to beat.
           </p>
+          <p className="font-display text-[clamp(3rem,5vw,5.5rem)] leading-[0.95]">
+            Log in.
+            <br />
+            <span className="text-[var(--accent)]">Lift heavy.</span>
+          </p>
+        </div>
+        <div className="flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md">
+            <h1 className="font-display text-4xl mb-2">Log in</h1>
+            <p className="font-mono text-sm text-[var(--muted)] mb-8">
+              Enter the logbook.
+            </p>
+            <form action={login} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wide mb-2">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wide mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete="current-password"
+                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm hover:bg-[var(--accent-strong)] active:scale-[0.98] transition-transform"
+              >
+                Log in
+              </button>
+            </form>
+            <p className="mt-6 text-sm font-mono text-[var(--muted)]">
+              No account?{' '}
+              <Link href="/signup" className="font-bold text-[var(--foreground)] hover:text-[var(--accent)]">
+                Sign up
+              </Link>
+              .
+            </p>
+          </div>
         </div>
       </main>
     </div>

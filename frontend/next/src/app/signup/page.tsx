@@ -3,59 +3,90 @@ import { signup } from '@/lib/actions/auth'
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex-1 flex flex-col">
       <header className="border-b-2 border-[var(--border)] bg-[var(--surface)]">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <Link href="/" className="text-2xl font-black uppercase tracking-tighter no-underline hover:text-[var(--accent)]">
-            TrainWithGouli
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-end">
+          <Link
+            href="/"
+            className="font-display text-2xl lowercase tracking-tight no-underline hover:text-[var(--foreground)]"
+          >
+            trainwithgouli<span className="text-[var(--accent)]">.</span>
           </Link>
         </div>
       </header>
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md border-2 border-[var(--border)] bg-[var(--surface)] p-6 md:p-8">
-          <h1 className="text-3xl font-black uppercase mb-6">Sign up</h1>
-          <form action={signup} className="space-y-4">
-            <div>
-              <label htmlFor="display_name" className="block text-sm font-bold uppercase mb-1">Display name</label>
-              <input
-                id="display_name"
-                name="display_name"
-                type="text"
-                className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-bold uppercase mb-1">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-bold uppercase mb-1">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full px-4 py-3 border-2 border-[var(--border)] bg-[var(--foreground)] text-[var(--background)] font-black uppercase hover:bg-[var(--accent)]"
-            >
-              Sign up
-            </button>
-          </form>
-          <p className="mt-4 text-sm font-mono">
-            Already have an account?{' '}
-            <Link href="/login" className="font-bold hover:text-[var(--accent)]">Log in</Link>.
+      <main className="flex-1 grid lg:grid-cols-2">
+        <div className="hidden lg:flex flex-col justify-between border-r-2 border-[var(--border)] p-12">
+          <p className="font-mono text-sm text-[var(--muted)] max-w-sm">
+            Coaching by Harish Gouli. You bring the effort, the logbook keeps
+            the score.
           </p>
+          <p className="font-display text-[clamp(3rem,5vw,5.5rem)] leading-[0.95]">
+            Sign up.
+            <br />
+            <span className="text-[var(--accent)]">Show up.</span>
+          </p>
+        </div>
+        <div className="flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md">
+            <h1 className="font-display text-4xl mb-2">Sign up</h1>
+            <p className="font-mono text-sm text-[var(--muted)] mb-8">
+              First session starts now.
+            </p>
+            <form action={signup} className="space-y-5">
+              <div>
+                <label htmlFor="display_name" className="block text-xs font-bold uppercase tracking-wide mb-2">
+                  Display name
+                </label>
+                <input
+                  id="display_name"
+                  name="display_name"
+                  type="text"
+                  autoComplete="nickname"
+                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wide mb-2">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wide mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm hover:bg-[var(--accent-strong)] active:scale-[0.98] transition-transform"
+              >
+                Sign up
+              </button>
+            </form>
+            <p className="mt-6 text-sm font-mono text-[var(--muted)]">
+              Already have an account?{' '}
+              <Link href="/login" className="font-bold text-[var(--foreground)] hover:text-[var(--accent)]">
+                Log in
+              </Link>
+              .
+            </p>
+          </div>
         </div>
       </main>
     </div>
