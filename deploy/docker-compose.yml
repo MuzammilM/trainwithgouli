@@ -5,7 +5,7 @@ services:
     env_file:
       - frontend.env
     volumes:
-      - /home/mz/.config/gogcli/sa.json:/run/secrets/google_sa.json:ro
+      - /home/mz/trainwithgouli/google_sa.json:/run/secrets/google_sa.json:ro
     expose:
       - "3000"
     networks:
