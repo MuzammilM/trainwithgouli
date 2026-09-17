@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
+import { COACH_PLACEHOLDER } from '@/content/coach'
 
 const SECTIONS = [
   {
@@ -79,6 +80,50 @@ export default async function HomePage() {
                   </Link>
                 </>
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* The Coach — placeholder band (P7). Content: src/content/coach.ts */}
+        <section
+          aria-labelledby="coach-heading"
+          className="coach-band relative overflow-hidden border-b-2 border-[var(--border)]"
+        >
+          <span
+            aria-hidden
+            className="coach-outline-word font-display absolute -right-4 bottom-0 select-none pointer-events-none"
+          >
+            Gouli
+          </span>
+          <div className="relative max-w-5xl mx-auto px-4 py-16 md:py-24">
+            <h2 id="coach-heading" className="font-display text-[clamp(2.75rem,11vw,6rem)] leading-[0.95]">
+              {COACH_PLACEHOLDER.kicker}
+              <br />
+              <span className="text-[var(--accent)]">{COACH_PLACEHOLDER.name}</span>
+            </h2>
+            <p className="mt-6 max-w-xl font-mono text-base md:text-lg text-[var(--muted)] text-pretty">
+              {COACH_PLACEHOLDER.bio}
+            </p>
+
+            {/* Stat strip — divided inline columns, not metric cards */}
+            <dl className="mt-10 max-w-xl border-2 border-[var(--border)] grid grid-cols-1 md:grid-cols-3 divide-y-2 md:divide-y-0 md:divide-x-2 divide-[var(--border)]">
+              {COACH_PLACEHOLDER.stats.map((stat) => (
+                <div key={stat.label} className="px-4 py-3 md:px-5 md:py-4">
+                  <dt className="font-mono text-xs uppercase tracking-wide text-[var(--muted)]">
+                    {stat.label}
+                  </dt>
+                  <dd className="mt-1 font-display text-2xl md:text-3xl">{stat.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="mt-10">
+              <Link
+                href={COACH_PLACEHOLDER.cta.href}
+                className="inline-block px-6 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm no-underline hover:bg-[var(--accent-strong)]"
+              >
+                {COACH_PLACEHOLDER.cta.label}
+              </Link>
             </div>
           </div>
         </section>

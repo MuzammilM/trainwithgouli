@@ -179,6 +179,15 @@
   .loading-bar {
     animation: loading-slide 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   }
+
+  /* "The Coach" band — low-opacity outlined background word (decorative only) */
+  .coach-outline-word {
+    font-size: clamp(6rem, 22vw, 16rem);
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 2px color-mix(in oklch, var(--foreground) 10%, transparent);
+    letter-spacing: 0.02em;
+  }
 }
 
 @keyframes page-in {
