@@ -1,6 +1,7 @@
-const VERSION = '0.6.3'
+const VERSION = '0.7.0'
 
 const VERSION_HISTORY = [
+  { version: '0.7.0', date: '2026-09-17', description: 'The Coach hero band on home (placeholder content)' },
   { version: '0.6.3', date: '2026-09-17', description: 'Spacing: client/Load gap; body-part chips clubbed in wrapping rows' },
   { version: '0.6.2', date: '2026-09-17', description: 'Fix faux-bold display headings; stacked mobile day-builder rows with per-field hints' },
   { version: '0.6.1', date: '2026-09-17', description: 'Write-back: exercise names, merged/centered banner+date, bold cream headers' },
