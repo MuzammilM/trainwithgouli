@@ -6,8 +6,8 @@
 |---|-------|------|----------|--------|---------|
 | Q-1 | Merge feature/sync-agents-from-manakeeshhub to main | fix | high | **completed** (c438f44 pushed) | merge-agents-to-main-20260917 |
 | Q-2 | Redesign website (impeccable): black/red gritty, mobile-first | feature | high | **completed** (30614ca, branch `feature/gouli-website-redesign-20260917`) | feature-gouli-website-redesign-20260917 |
-| Q-3 | Google Sheets integration via gog CLI (creds from ~/workspace/manakeeshhub) | feature | medium | pending | — |
-| Q-4 | Google SSO setup (from ~/workspace/smarann) | feature | medium | pending | — |
+| Q-3 | Google Sheets integration (direct Sheets API, SA key from manakeeshhub) | feature | medium | pending (P3) | — |
+| Q-4 | Google SSO via PocketBase OAuth2 (smarann GCP client reused) | feature | medium | **P1 done** (provider configured, coaches seeded) | feature-pocketbase-auth-20260917 |
 | Q-5 | Gouli client management (add client, verify SA share, first user madebymzm@gmail.com) | feature | medium | pending | — |
 | Q-6 | Workout generation w/ YouTube links + last-weight from sheet | feature | medium | pending | — |
 
@@ -42,3 +42,12 @@
 - Gateway: trainwithgouli.conf was in disabled/ — moved to conf.d, nginx -t + reload. https://trainwithgouli.mzm.co.in live 200.
 - CAVEAT: image built with placeholder Supabase values (same as v0.2.0 — auth never worked on dev). Real anon/publishable key needed from Supabase dashboard for auth; Supabase migrations also still unapplied (auth/DB features dead until then).
 - Rollback: podman-compose up -d frontend-next with VERSION=0.2.0 (image still on hub).
+
+
+## P1 PocketBase auth foundation (completed 2026-09-17)
+
+- Subagent (Changes & Fixes Agent) migrated frontend/next Supabase→PocketBase: SDK layer (client/server/admin), Google SSO login (invite-only allowlist via `clients` collection), session cookies, all pages/actions migrated, Supabase deps removed. Build clean, commit fa62c94, merged to main (8f5505d), release 0.4.0.
+- Orchestrator gap closed: created PocketBase collections on dev02 (exercises, workout_plans, plan_exercises, workout_days, workout_sets, clients) + API rules (auth'd read, owner-or-coach write, clients coach-only, users self-read/update). Google OAuth2 provider configured with smarann client (secret in ansible vault).
+- Deployed dev: frontend-v0.4.0 container, service creds injected via 600 frontend.env (ssh pipe from dev02, never in transcript), gateway reloaded. Live checks pass (home/login/exercises 200, Google button present, env vars present).
+- MANUAL TEST PENDING (needs human Google login): harishgouli27@gmail.com login → coach session; unregistered gmail → not-registered error box; logout.
+- Next: P2 client-management UI, P3 sheets sync, P4 workout day page.
