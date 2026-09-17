@@ -71,6 +71,18 @@ export default async function ExercisesPage() {
                 {exercise.description && (
                   <p className="font-mono text-sm text-[var(--muted)] mb-3">{exercise.description}</p>
                 )}
+                {Array.isArray(exercise.body_part) && exercise.body_part.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {exercise.body_part.map((tag: string) => (
+                      <span
+                        key={tag}
+                        className="font-mono text-[10px] uppercase border border-[var(--border)] px-1 py-0.5"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {exercise.youtube_url && <YouTubeEmbed url={exercise.youtube_url} />}
               </article>
             ))}

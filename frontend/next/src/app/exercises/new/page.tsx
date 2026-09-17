@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { createExercise } from '@/lib/actions/exercises'
+import { BodyPartChips } from '@/components/BodyPartChips'
 
 export default async function NewExercisePage() {
   const user = await getAuthUser()
@@ -55,6 +56,7 @@ export default async function NewExercisePage() {
               className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
             />
           </div>
+          <BodyPartChips />
           <div className="flex gap-4">
             <Link
               href="/exercises"

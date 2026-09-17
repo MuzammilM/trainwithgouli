@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { updateExercise } from '@/lib/actions/exercises'
+import { BodyPartChips } from '@/components/BodyPartChips'
 
 export default async function EditExercisePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -79,6 +80,7 @@ export default async function EditExercisePage({ params }: { params: Promise<{ i
               className="w-full px-3 py-2 border-2 border-[var(--border)] bg-[var(--background)]"
             />
           </div>
+          <BodyPartChips selected={exercise.body_part || []} />
           <div className="flex gap-4">
             <Link
               href="/exercises"
