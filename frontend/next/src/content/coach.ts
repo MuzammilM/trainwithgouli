@@ -11,5 +11,5 @@ export const COACH_PLACEHOLDER = {
     { label: 'Clients trained', value: '50+' },
     { label: 'Sessions logged', value: '1,200+' },
   ],
-  cta: { label: 'Start training', href: '/signup' },
+  cta: { label: 'Start training', href: '/login' },
 } as const
