@@ -240,50 +240,54 @@ export async function appendDayBlock(
     const coolDownRowIndex = bannerRowIndex + values.length - 1
     const sheetIdNumeric = await resolveNumericSheetId(sheetId, tabTitle)
 
+    const headerRowIndex = bannerRowIndex + 2
+    const CREAM = { red: 1, green: 0.9, blue: 0.6 } // #ffe599 house cream
+    const BLACK = { red: 0, green: 0, blue: 0 }
+    const WHITE = { red: 1, green: 1, blue: 1 }
+    const fullRow = (rowIndex: number) => ({
+      sheetId: sheetIdNumeric,
+      startRowIndex: rowIndex,
+      endRowIndex: rowIndex + 1,
+      startColumnIndex: 0,
+      endColumnIndex: 6,
+    })
+
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: sheetId,
       requestBody: {
         requests: [
+          // Merge banner, date, and cool-down rows across A:F
+          { mergeCells: { range: fullRow(bannerRowIndex), mergeType: 'MERGE_ALL' } },
+          { mergeCells: { range: fullRow(dateRowIndex), mergeType: 'MERGE_ALL' } },
+          { mergeCells: { range: fullRow(coolDownRowIndex), mergeType: 'MERGE_ALL' } },
+          // Banner: black bg, white bold, centered
           {
             repeatCell: {
-              range: {
-                sheetId: sheetIdNumeric,
-                startRowIndex: bannerRowIndex,
-                endRowIndex: bannerRowIndex + 1,
-                startColumnIndex: 0,
-                endColumnIndex: 6,
-              },
-              cell: {
-                userEnteredFormat: {
-                  backgroundColor: { red: 0, green: 0, blue: 0 },
-                  textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 }, bold: true },
-                },
-              },
-              fields: 'userEnteredFormat(backgroundColor,textFormat)',
+              range: fullRow(bannerRowIndex),
+              cell: { userEnteredFormat: { backgroundColor: BLACK, horizontalAlignment: 'CENTER', textFormat: { foregroundColor: WHITE, bold: true } } },
+              fields: 'userEnteredFormat(backgroundColor,horizontalAlignment,textFormat)',
             },
           },
+          // Date row: cream bg, bold, centered
           {
             repeatCell: {
-              range: {
-                sheetId: sheetIdNumeric,
-                startRowIndex: dateRowIndex,
-                endRowIndex: dateRowIndex + 1,
-                startColumnIndex: 0,
-                endColumnIndex: 6,
-              },
-              cell: { userEnteredFormat: { textFormat: { bold: true } } },
-              fields: 'userEnteredFormat.textFormat.bold',
+              range: fullRow(dateRowIndex),
+              cell: { userEnteredFormat: { backgroundColor: CREAM, horizontalAlignment: 'CENTER', textFormat: { bold: true } } },
+              fields: 'userEnteredFormat(backgroundColor,horizontalAlignment,textFormat.bold)',
             },
           },
+          // Header row: cream bg, bold, centered
           {
             repeatCell: {
-              range: {
-                sheetId: sheetIdNumeric,
-                startRowIndex: coolDownRowIndex,
-                endRowIndex: coolDownRowIndex + 1,
-                startColumnIndex: 0,
-                endColumnIndex: 6,
-              },
+              range: fullRow(headerRowIndex),
+              cell: { userEnteredFormat: { backgroundColor: CREAM, horizontalAlignment: 'CENTER', textFormat: { bold: true } } },
+              fields: 'userEnteredFormat(backgroundColor,horizontalAlignment,textFormat.bold)',
+            },
+          },
+          // Cool-down: italic
+          {
+            repeatCell: {
+              range: fullRow(coolDownRowIndex),
               cell: { userEnteredFormat: { textFormat: { italic: true } } },
               fields: 'userEnteredFormat.textFormat.italic',
             },
