@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Anton, Archivo, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
@@ -20,9 +20,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "trainwithgouli — coaching by Harish Gouli",
+  title: {
+    default: "trainwithgouli — coaching by Harish Gouli",
+    template: "%s — trainwithgouli",
+  },
   description:
     "Gritty workout tracking. Log lifts, chase numbers, earn the next plate.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#211b1d",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({

@@ -17,13 +17,13 @@ export function Footer() {
           aria-label="Footer"
           className="flex flex-wrap items-start gap-x-6 gap-y-2 text-sm font-bold uppercase h-fit"
         >
-          <Link href="/exercises" className="nav-link">
+          <Link href="/exercises" className="nav-link py-3 md:py-1">
             Exercises
           </Link>
-          <Link href="/plans" className="nav-link">
+          <Link href="/plans" className="nav-link py-3 md:py-1">
             Plans
           </Link>
-          <Link href="/days" className="nav-link">
+          <Link href="/days" className="nav-link py-3 md:py-1">
             Days
           </Link>
         </nav>

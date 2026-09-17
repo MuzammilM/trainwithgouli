@@ -36,3 +36,34 @@ Secondary routes (exercises, plans, days + new/edit pages, DaySetBuilder, PlanEx
 - Impeccable `context.mjs` reports NO_PRODUCT_MD (scans repo root); existing `frontend/next/PRODUCT.md` used as product context directly.
 - Runtime env note: client bundle inlines NEXT_PUBLIC_SUPABASE_* at build time; local visual testing used the dev project URL + placeholder anon JWT (publishable key endpoint failed). No secrets committed; `.next` gitignored.
 - Unverified visually by screenshot review (no image-viewing tool in this session) — verified via DOM/computed-style/canvas measurements instead.
+
+## Senior polish pass
+
+Impeccable `polish` + `product`-register critique of the shipped IRON/RED world. Detector (`detect.mjs`) clean on all touched files. Verdict: the redesign was solid; issues were concentrated in auth interaction states and a11y minutiae, not the visual system.
+
+### Findings → fixes
+
+**Functional**
+1. **Auth errors were invisible** — `login`/`signup` server actions threw on Supabase error, dumping users on Next's default exception screen. Now redirect back to `/login?error=…` / `/signup?error=…`; pages (now async, reading `searchParams`) render the message in a `role="alert"` box (2px red border, 12% red tint, mono — no new color introduced).
+2. **No submit pending state** — double-submit possible, zero feedback. New client `AuthSubmitButton` (`useFormStatus`): shows "Logging in…" / "Signing up…", disables while pending.
+3. **No route loading feedback** — every page awaits Supabase and navigations hung silently. New global `app/loading.tsx`: indeterminate 3px red chalk-line at the top edge + mono "Loading…", `role="status"`, animation killed under reduced motion.
+
+**Craft / a11y**
+4. `color-scheme: dark` added to `:root` (dark-only world was leaking light scrollbars / white autofill / light controls) + `viewport` export in root layout (`themeColor #211b1d`, `colorScheme dark`) so mobile browser chrome matches.
+5. **Cascade-layer bug (same class as the unlayered-base bug)**: `.nav-link` / `.page-enter` were unlayered and would silently beat Tailwind utilities. Moved custom classes into `@layer components`; keyframes and the reduced-motion override stay unlayered so the override still wins.
+6. **Touch targets to 44px** (mobile-first brief): mobile nav link row (`py-3.5`, underline now reads as a tab indicator at the row's bottom edge), Log out / Sign up buttons (`min-h-11`), top-bar Log in and footer links (`py-3.5`/`py-3` on mobile, compact on desktop).
+7. **Nested navigation landmarks removed** — mobile row no longer declares `role="navigation"` inside `<nav>`; the outer nav now carries `aria-label="Primary"`.
+8. **Dead hover removed** on the brand wordmark (`hover:text-foreground` was a no-op); hover now brightens only the red dot (`--accent-strong`).
+9. **Home row hover contrast**: section description no longer stays at `opacity-80` over the red invert (`group-hover:opacity-100` — full black on red, 5.7:1).
+10. **Doc drift**: DESIGN.md accent token corrected to the shipped `oklch(0.64 0.2 22)` (#ed4952); `--accent-strong` / `--accent-ink` documented.
+
+Also: `decoding="async"` on the hero image; metadata title template (`%s — trainwithgouli`) for future per-page titles.
+
+### Verification
+- `npm run build` clean (Next 16.2.9, TS strict, 13/13 routes).
+- Error-box text is `--foreground` on 12% red tint over surface — well above 4.5:1.
+- Reduced-motion override confirmed still unlayered → wins over `@layer components` animations.
+
+### Not changed (deliberate)
+- 420ms route transition kept — brief explicitly asked for smooth page animations; product-register 250ms guidance yields to the brand ask.
+- No global `error.tsx` — auth (the common throw path) no longer throws; remaining throws are pre-existing authorization guards, out of polish scope.

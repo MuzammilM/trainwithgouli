@@ -14,7 +14,7 @@ export async function login(formData: FormData): Promise<void> {
   const password = formData.get('password') as string
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) throw new Error(error.message)
+  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`)
 
   revalidatePath('/', 'layout')
   redirect('/')
@@ -33,7 +33,7 @@ export async function signup(formData: FormData): Promise<void> {
       data: { display_name: displayName || email },
     },
   })
-  if (error) throw new Error(error.message)
+  if (error) redirect(`/signup?error=${encodeURIComponent(error.message)}`)
 
   revalidatePath('/', 'layout')
   redirect('/')

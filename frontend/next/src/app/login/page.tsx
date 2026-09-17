@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import { login } from '@/lib/actions/auth'
+import { AuthSubmitButton } from '@/components/AuthSubmitButton'
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
   return (
     <div className="flex-1 flex flex-col">
       <header className="border-b-2 border-[var(--border)] bg-[var(--surface)]">
@@ -31,6 +37,14 @@ export default function LoginPage() {
             <p className="font-mono text-sm text-[var(--muted)] mb-8">
               Enter the logbook.
             </p>
+            {error ? (
+              <p
+                role="alert"
+                className="mb-6 border-2 border-[var(--accent)] bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] px-3 py-2.5 font-mono text-sm"
+              >
+                {error}
+              </p>
+            ) : null}
             <form action={login} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wide mb-2">
@@ -59,12 +73,7 @@ export default function LoginPage() {
                   className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
                 />
               </div>
-              <button
-                type="submit"
-                className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm hover:bg-[var(--accent-strong)] active:scale-[0.98] transition-transform"
-              >
-                Log in
-              </button>
+              <AuthSubmitButton label="Log in" pendingLabel="Logging in…" />
             </form>
             <p className="mt-6 text-sm font-mono text-[var(--muted)]">
               No account?{' '}

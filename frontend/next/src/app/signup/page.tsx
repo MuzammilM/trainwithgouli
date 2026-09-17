@@ -1,7 +1,13 @@
 import Link from 'next/link'
 import { signup } from '@/lib/actions/auth'
+import { AuthSubmitButton } from '@/components/AuthSubmitButton'
 
-export default function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
   return (
     <div className="flex-1 flex flex-col">
       <header className="border-b-2 border-[var(--border)] bg-[var(--surface)]">
@@ -32,6 +38,14 @@ export default function SignupPage() {
             <p className="font-mono text-sm text-[var(--muted)] mb-8">
               First session starts now.
             </p>
+            {error ? (
+              <p
+                role="alert"
+                className="mb-6 border-2 border-[var(--accent)] bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] px-3 py-2.5 font-mono text-sm"
+              >
+                {error}
+              </p>
+            ) : null}
             <form action={signup} className="space-y-5">
               <div>
                 <label htmlFor="display_name" className="block text-xs font-bold uppercase tracking-wide mb-2">
@@ -72,12 +86,7 @@ export default function SignupPage() {
                   className="w-full px-3 py-2.5 border-2 border-[var(--border)] focus:border-[var(--accent)]"
                 />
               </div>
-              <button
-                type="submit"
-                className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm hover:bg-[var(--accent-strong)] active:scale-[0.98] transition-transform"
-              >
-                Sign up
-              </button>
+              <AuthSubmitButton label="Sign up" pendingLabel="Signing up…" />
             </form>
             <p className="mt-6 text-sm font-mono text-[var(--muted)]">
               Already have an account?{' '}

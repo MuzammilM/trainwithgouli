@@ -50,6 +50,7 @@ export default async function HomePage() {
             src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1600&q=80"
             alt=""
             aria-hidden
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover opacity-25"
           />
           <div className="absolute inset-0 bg-[color-mix(in_oklch,var(--background)_68%,transparent)]" />
@@ -113,7 +114,7 @@ export default async function HomePage() {
                   <h3 className="font-display text-2xl md:text-3xl">
                     {section.label}
                   </h3>
-                  <p className="mt-1 font-mono text-xs md:text-sm text-[var(--muted)] group-hover:text-[var(--accent-ink)] opacity-80">
+                  <p className="mt-1 font-mono text-xs md:text-sm text-[var(--muted)] group-hover:text-[var(--accent-ink)] opacity-80 group-hover:opacity-100">
                     {section.desc}
                   </p>
                 </div>

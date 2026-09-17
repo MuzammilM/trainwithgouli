@@ -14,7 +14,9 @@ Athletes in a garage gym at 6am: chalk dust, phone propped on the rack, dim room
 | `--surface-2` | `oklch(0.235 0.016 25)` | Raised/hover surfaces |
 | `--foreground` | `oklch(0.945 0.012 60)` | Chalk white — all text |
 | `--muted` | `oklch(0.62 0.02 30)` | Secondary text, placeholders (≥4.5:1) |
-| `--accent` | `oklch(0.576 0.215 22)` | Blood red — actions, selection, focus only |
+| `--accent` | `oklch(0.64 0.2 22)` (#ed4952) | Blood red — actions, selection, focus only |
+| `--accent-strong` | `oklch(0.7 0.21 24)` | Hover state of red |
+| `--accent-ink` | `oklch(0 0 0)` | Black text on red |
 | `--border` | `oklch(0.32 0.015 25)` | Hairlines, 2px control borders |
 
 Strategy: Committed. Red is never decoration — it marks the current action, the active nav state, and the focus ring. Body text never uses red.
