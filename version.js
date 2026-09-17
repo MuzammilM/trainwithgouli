@@ -1,6 +1,7 @@
-const VERSION = '0.6.2'
+const VERSION = '0.6.3'
 
 const VERSION_HISTORY = [
+  { version: '0.6.3', date: '2026-09-17', description: 'Spacing: client/Load gap; body-part chips clubbed in wrapping rows' },
   { version: '0.6.2', date: '2026-09-17', description: 'Fix faux-bold display headings; stacked mobile day-builder rows with per-field hints' },
   { version: '0.6.1', date: '2026-09-17', description: 'Write-back: exercise names, merged/centered banner+date, bold cream headers' },
   { version: '0.6.0', date: '2026-09-17', description: 'Workout day builder — sheet history, last-lift guide, exercise tags, sheet write-back' },

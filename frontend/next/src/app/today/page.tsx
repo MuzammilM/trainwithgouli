@@ -87,7 +87,7 @@ export default async function TodayPage({
 
         {user.role === 'coach' ? (
           clients.length > 0 ? (
-            <form method="get" className="mb-6">
+            <form method="get" className="mb-6 flex flex-wrap md:items-end gap-2">
               <label htmlFor="client" className="block text-sm font-bold uppercase mb-1">
                 Client
               </label>
@@ -95,7 +95,7 @@ export default async function TodayPage({
                 id="client"
                 name="client"
                 defaultValue={selectedEmail ?? ''}
-                className="w-full md:w-80 px-3 py-2 border-2 border-[var(--border)] bg-[var(--surface)] font-mono text-sm"
+                className="w-full md:w-80 px-3 py-2 border-2 border-[var(--border)] bg-[var(--surface)] font-mono text-sm md:mb-0"
               >
                 {clients.map((c) => (
                   <option key={c.id} value={c.email}>
@@ -105,7 +105,7 @@ export default async function TodayPage({
               </select>
               <button
                 type="submit"
-                className="ml-2 px-3 py-2 border-2 border-[var(--border)] font-bold uppercase text-xs hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
+                className="px-3 py-2 border-2 border-[var(--border)] font-bold uppercase text-xs hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
               >
                 Load
               </button>

@@ -249,7 +249,7 @@ function DayRowFields({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         {BODY_PARTS.map((part) => (
           <button
             key={part}
