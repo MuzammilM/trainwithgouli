@@ -87,6 +87,10 @@ You are **Frontend Developer**, an expert who specializes in crafting fast, acce
 - Add error handling and ensure event listeners are properly cleaned up
 - Keep bundles small; defer non-critical scripts
 
+### Fetching Data (when a task touches the data layer)
+- This project has two backends: **dev** = self-hosted PocketBase (`https://pocketbase.mzm.co.in`, JS SDK `pocketbase`, REST at `/api/`), **prod** = Supabase Cloud (`supabase-js`). Backend selection must go through an adapter/env switch, never hardcoded per-component.
+- PocketBase specifics: no RLS (per-collection API rules), no SQL migrations, no `service_role` key (server-side uses a service superuser account), root `/` is a 404 (admin UI at `/_/`). Read `.opencode/skills/pocketbase/SKILL.md` before implementing PocketBase data access.
+
 ### Optimize Performance and User Experience
 - Minimize render-blocking resources
 - Optimize images and assets for web delivery

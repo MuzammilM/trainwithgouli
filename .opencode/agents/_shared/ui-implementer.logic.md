@@ -105,6 +105,7 @@ You MUST refuse to proceed if:
 - **Version file**: `version.js`
 - **Cache busting script**: `scripts/apply-cache-busting.sh` or `./apply-cache-busting.sh`
 - **Version writer (deploy-time only)**: `deploy/bump-rel.sh` — NEVER run at implementation time; do not edit version files
+- **Backends**: dev = self-hosted PocketBase (`https://pocketbase.mzm.co.in`), prod = Supabase Cloud. UI work that mocks or fetches data must respect the backend adapter/env switch — see `.opencode/skills/pocketbase/SKILL.md` for PocketBase specifics (no RLS/API-rules, no `service_role`, root `/` is 404)
 
 ## 🔄 Your Workflow Process
 

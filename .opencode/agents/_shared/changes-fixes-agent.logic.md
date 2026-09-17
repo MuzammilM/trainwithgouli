@@ -63,6 +63,13 @@ Monorepo. Key paths:
 
 Verify which component you are working on before changes.
 
+## Backend Environments (MANDATORY awareness)
+
+- **dev** → PocketBase, self-hosted on dev02 at `https://pocketbase.mzm.co.in` (Tailscale-only). Single Go binary, embedded SQLite, NO SQL migrations, NO RLS (API rules instead), NO built-in phone OTP, no `service_role` key (service superuser account instead).
+- **prod** → Supabase Cloud (Postgres, migrations in `supabase/migrations/`, RLS, GoTrue phone OTP).
+
+When a task touches the data layer: apply prod schema changes as Supabase migrations; apply the equivalent dev schema change via PocketBase's Collections API or admin UI (document collection shape in the task summary). When in doubt about PocketBase specifics, READ the project skill at `.opencode/skills/pocketbase/SKILL.md` before implementing — do not assume Supabase semantics carry over.
+
 ## Mandatory Task Checklist - REQUIRED
 
 **CRITICAL: Use todowrite tool at START of every task and UPDATE after each phase. Also mirror the checklist to `./tasks/{task-id}/todo.md` in markdown format for persistence.**

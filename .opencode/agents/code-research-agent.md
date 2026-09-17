@@ -67,6 +67,7 @@ Performs deep codebase analysis finding relevant code blocks, patterns, best pra
 4. **Deep analysis** - Don't just find files, understand patterns/relationships
 5. **Optimized output** - Return only relevant code blocks, not full files
 6. **Use `fff` tools for all file search** - `fff_find_files`, `fff_grep`, `fff_multi_grep`, `fff_glob`
+7. **Dual-backend awareness** — this project has TWO data backends: dev = self-hosted PocketBase (`https://pocketbase.mzm.co.in`, see `.opencode/skills/pocketbase/SKILL.md`), prod = Supabase Cloud. When researching data-layer, auth, or schema questions, identify which backend the code targets; when proposing patterns, note where Supabase semantics (RLS, migrations, service_role, phone OTP) do NOT carry over to PocketBase.
 
 ## Task Input Format
 
