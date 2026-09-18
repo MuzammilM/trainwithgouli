@@ -180,13 +180,27 @@
     animation: loading-slide 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   }
 
-  /* "The Coach" band — low-opacity outlined background word (decorative only) */
-  .coach-outline-word {
-    font-size: clamp(6rem, 22vw, 16rem);
-    line-height: 0.8;
-    color: transparent;
-    -webkit-text-stroke: 2px color-mix(in oklch, var(--foreground) 10%, transparent);
+  /* Coach hero v2 — photo treatment (IRON/RED poster) */
+  /* 2px accent-red frame offset behind the photo. The wrapper keeps 12px
+     slack (mr-3 mb-3) so the offset survives the zone's overflow-hidden. */
+  .coach-photo-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translate(0.75rem, 0.75rem);
+    border: 2px solid var(--accent);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Faded Anton background-word stack printed over the darkened photo.
+     Accent red at ~7% — texture, not signal. Decorative only (aria-hidden). */
+  .coach-bg-words {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 0.92;
     letter-spacing: 0.02em;
+    color: color-mix(in oklch, var(--accent) 7%, transparent);
+    transform: translateX(0.18em); /* crop the right edge against the container */
   }
 }
 
