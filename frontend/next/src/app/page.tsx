@@ -37,7 +37,49 @@ export default async function HomePage() {
     <>
       <Nav user={user} />
       <main className="flex-1 w-full">
-        <section className="relative overflow-hidden border-b-2 border-[var(--border)]">
+        {/* Mobile: vertical coach banner is the first thing seen; CTAs sit under it (desktop keeps the HTML hero) */}
+        <section className="md:hidden">
+          <img
+            src="/images/coach-banner-vertical.jpg"
+            alt="Train with Harish Gouli — strength, martial arts, rehabilitation"
+            className="w-full h-auto block"
+            decoding="async"
+          />
+          <div className="px-4 py-4 flex flex-col gap-3 border-b-2 border-[var(--border)]">
+            {user ? (
+              <>
+                <Link
+                  href="/days/new"
+                  className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm text-center no-underline hover:bg-[var(--accent-strong)]"
+                >
+                  Log a workout
+                </Link>
+                <Link
+                  href="/days"
+                  className="px-6 py-3 border-2 border-[var(--border)] font-black uppercase text-sm text-center no-underline hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                >
+                  View logbook
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm text-center no-underline hover:bg-[var(--accent-strong)]"
+                >
+                  Start training
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-6 py-3 border-2 border-[var(--border)] font-black uppercase text-sm text-center no-underline hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                >
+                  Log in
+                </Link>
+              </>
+            )}
+          </div>
+        </section>
+        <section className="relative overflow-hidden border-b-2 border-[var(--border)] hidden md:block">
           <img
             src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1600&q=80"
             alt=""
@@ -96,7 +138,7 @@ export default async function HomePage() {
         {/* The Coach — hero band v2. Content: src/content/coach.ts */}
         <section
           aria-labelledby="coach-heading"
-          className="relative overflow-hidden border-b-2 border-[var(--border)]"
+          className="relative overflow-hidden border-b-2 border-[var(--border)] hidden md:block"
         >
           <div className="max-w-5xl mx-auto px-4 py-16 md:py-24">
             <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
