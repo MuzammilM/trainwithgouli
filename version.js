@@ -1,6 +1,7 @@
-const VERSION = '0.8.1'
+const VERSION = '0.8.2'
 
 const VERSION_HISTORY = [
+  { version: '0.8.2', date: '2026-09-18', description: 'BJJ Blue Belt label correction' },
   { version: '0.8.1', date: '2026-09-18', description: 'Coach hero fixes: photo perms (unreadable file), blue belt correction, remove stray mock asset' },
   { version: '0.8.0', date: '2026-09-18', description: 'Coach hero v2 — HARISH GOULI band with photo, credentials, IRON/RED treatment' },
   { version: '0.7.0', date: '2026-09-17', description: 'The Coach hero band on home (placeholder content)' },

@@ -22,7 +22,7 @@ export const COACH = {
     { label: 'View programs', href: '/plans', variant: 'outline' },
   ],
   credentials: [
-    { icon: 'medal', label: 'BJJ Black Belt', sub: '4 stripes' },
+    { icon: 'medal', label: 'BJJ Blue Belt', sub: '4 stripes' },
     { icon: 'trophy', label: 'MMA & BJJ', sub: 'Champion' },
     { icon: 'users', label: 'National level', sub: 'Athletes coached' },
     { icon: 'heartpulse', label: 'Rehabilitation', sub: 'Specialist' },
