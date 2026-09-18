@@ -1,6 +1,7 @@
-const VERSION = '0.7.0'
+const VERSION = '0.8.0'
 
 const VERSION_HISTORY = [
+  { version: '0.8.0', date: '2026-09-18', description: 'Coach hero v2 — HARISH GOULI band with photo, credentials, IRON/RED treatment' },
   { version: '0.7.0', date: '2026-09-17', description: 'The Coach hero band on home (placeholder content)' },
   { version: '0.6.3', date: '2026-09-17', description: 'Spacing: client/Load gap; body-part chips clubbed in wrapping rows' },
   { version: '0.6.2', date: '2026-09-17', description: 'Fix faux-bold display headings; stacked mobile day-builder rows with per-field hints' },
