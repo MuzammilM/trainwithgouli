@@ -230,24 +230,31 @@ export type DayRow = {
   reps: string
   sets: string
   rest?: string
+  coach_notes?: string
 }
 
 const COOL_DOWN_LINE =
   'Cool downtown • Static stretch • Hold the stretch 10-15sec • Exhale and Inhale comfortably.'
 
 /**
- * Append a workout day-block to the client's sheet in the house format:
- * banner → DD/MM/YYYY date row → column headers → exercise rows (date repeated)
- * → cool-down footer. Then applies minimal formatting (bold banner with black
- * background + white text, bold date row, italic cool-down) via one batchUpdate.
+ * Append a workout day-block to the client's sheet in the 8-column house format:
+ * banner → DD/MM/YYYY date row → column headers (Date|Workouts|Weights|
+ * Repetition|Sets|Rest|Coach Notes|Client Notes) → exercise rows (date repeated,
+ * coach notes in col G, empty col H) → cool-down footer. Then applies minimal
+ * formatting (bold banner with black background + white text, cream bold date
+ * and header rows, italic cool-down) via one batchUpdate, all merged A:H.
  * Clears the history cache so subsequent reads see the new rows.
+ *
+ * Returns the 1-based row number of the FIRST exercise row of the appended
+ * block (banner=1, date=2, header=3 → first exercise = banner row + 3), so
+ * callers can store it in workout_days.sheet_row_start.
  */
 export async function appendDayBlock(
   sheetId: string,
   email: string,
   dateISO: string,
   rows: DayRow[],
-): Promise<void> {
+): Promise<number> {
   const tabTitle = await resolveTabTitle(sheetId, email)
   if (!tabTitle) throw new Error('no-tab')
 
@@ -257,8 +264,17 @@ export async function appendDayBlock(
   const values = [
     ['Train with Harry Gouli'],
     [ddMmYyyy(dateISO)],
-    ['Date', 'Workouts', 'Weights', 'Repetition', 'Sets', 'Rest'],
-    ...rows.map((r) => [ddMmYyyy(dateISO), r.exercise, r.weight, r.reps, r.sets, r.rest ?? '']),
+    ['Date', 'Workouts', 'Weights', 'Repetition', 'Sets', 'Rest', 'Coach Notes', 'Client Notes'],
+    ...rows.map((r) => [
+      ddMmYyyy(dateISO),
+      r.exercise,
+      r.weight,
+      r.reps,
+      r.sets,
+      r.rest ?? '',
+      r.coach_notes ?? '',
+      '',
+    ]),
     [COOL_DOWN_LINE],
   ]
 
@@ -270,13 +286,15 @@ export async function appendDayBlock(
     requestBody: { values },
   })
 
-  // Derive the first appended row from the updated range (e.g. 'Tab'!A12:F18)
+  // Derive the first appended row (the banner) from the updated range (e.g. 'Tab'!A12:H18)
   const updatedRange = appendRes.data.updates?.updatedRange ?? ''
   const rowMatch = updatedRange.match(/![A-Z]+(\d+)/)
-  const startRow = rowMatch ? Number(rowMatch[1]) : null
+  const bannerRow = rowMatch ? Number(rowMatch[1]) : null
+  // First exercise row: banner=1, date=2, header=3 → 4 (+ block offset)
+  const firstExerciseRow = bannerRow != null ? bannerRow + 3 : null
 
-  if (startRow != null) {
-    const bannerRowIndex = startRow - 1 // 0-based grid coordinates
+  if (bannerRow != null) {
+    const bannerRowIndex = bannerRow - 1 // 0-based grid coordinates
     const dateRowIndex = bannerRowIndex + 1
     const coolDownRowIndex = bannerRowIndex + values.length - 1
     const sheetIdNumeric = await resolveNumericSheetId(sheetId, tabTitle)
@@ -290,14 +308,14 @@ export async function appendDayBlock(
       startRowIndex: rowIndex,
       endRowIndex: rowIndex + 1,
       startColumnIndex: 0,
-      endColumnIndex: 6,
+      endColumnIndex: 8,
     })
 
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: sheetId,
       requestBody: {
         requests: [
-          // Merge banner, date, and cool-down rows across A:F
+          // Merge banner, date, and cool-down rows across A:H
           { mergeCells: { range: fullRow(bannerRowIndex), mergeType: 'MERGE_ALL' } },
           { mergeCells: { range: fullRow(dateRowIndex), mergeType: 'MERGE_ALL' } },
           { mergeCells: { range: fullRow(coolDownRowIndex), mergeType: 'MERGE_ALL' } },
@@ -339,6 +357,33 @@ export async function appendDayBlock(
   }
 
   clearHistoryCache(sheetId)
+  return firstExerciseRow ?? 0
+}
+
+/**
+ * Write a single cell (column H = Client Notes) on the resolved tab.
+ * Fail-soft: never throws — a sheet sync failure must never block the app.
+ */
+export async function updateClientNoteCell(
+  sheetId: string,
+  email: string,
+  row: number,
+  text: string,
+): Promise<void> {
+  try {
+    const tabTitle = await resolveTabTitle(sheetId, email)
+    if (!tabTitle || !Number.isFinite(row) || row < 1) return
+    const sheets = getSheetsClient(true)
+    const quoted = `'${tabTitle.replace(/'/g, "''")}'`
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `${quoted}!H${row}`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [[text]] },
+    })
+  } catch {
+    // Fail-soft by contract.
+  }
 }
 
 /** Resolve the numeric sheetId (grid id) for a tab title. */

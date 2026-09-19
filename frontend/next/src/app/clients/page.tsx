@@ -53,7 +53,10 @@ export default async function ClientsPage() {
     <>
       <Nav user={user} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full">
-        <h1 className="text-4xl font-black uppercase tracking-tighter mb-8">Clients</h1>
+        <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Clients</h1>
+        <p className="font-mono text-sm text-[var(--muted)] mb-8">
+          Coach-managed clients and their Google Sheets.
+        </p>
 
         <AddClientForm />
 
