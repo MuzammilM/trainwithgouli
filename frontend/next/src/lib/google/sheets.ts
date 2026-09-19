@@ -69,6 +69,47 @@ export function parseDdMmYyyy(raw: string): string | null {
 }
 
 /**
+ * Parse a free-text weight cell into a numeric kg value for the leaderboard.
+ * Conservative: returns null unless the cell is a clean number or range with
+ * an optional "kg" unit.
+ *
+ * Excluded (null): empty cells, anything mentioning bar/BW/bodyweight/AMRAP,
+ * time or distance units (sec, steps, standalone "m"), and bare numbers
+ * without a kg unit.
+ *
+ * Accepted: "60kg" → 60, "12.5kg" → 12.5, "12.5-15 kg" → 15 (range max).
+ */
+export function parseWeightKg(raw: string): number | null {
+  const s = raw.trim()
+  if (!s) return null
+  const lower = s.toLowerCase()
+  if (
+    /\bbar\b/.test(lower) ||
+    /\bbw\b/.test(lower) ||
+    /bodyweight/.test(lower) ||
+    /\bamrap\b/.test(lower) ||
+    /\bsec\b/.test(lower) ||
+    /\bsecs\b/.test(lower) ||
+    /\bsteps?\b/.test(lower) ||
+    // standalone "m" (meters) — attached ("12.5m") or separated ("12.5 m")
+    /\bm\b/.test(lower) ||
+    /\d\s*m\b/.test(lower)
+  ) {
+    return null
+  }
+
+  // Range "a-b kg" (optional single kg after the second number) → max
+  const range = lower.match(/^(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*kg$/)
+  if (range) return Math.max(Number(range[1]), Number(range[2]))
+
+  // Single "N kg" (unit optional per match, but required for acceptance)
+  const kgMatches = [...s.matchAll(/(\d+(?:\.\d+)?)\s*kg/gi)]
+  if (kgMatches.length === 1) return Number(kgMatches[0][1])
+
+  return null
+}
+
+/**
  * Parse the fixed house format: a vertical stack of day-blocks in columns A–F
  * (Date | Workouts | Weights | Repetition | Sets | Rest).
  *
