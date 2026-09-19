@@ -15,11 +15,14 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { toggleDone, reorder, saveClientNote, importSheetBlock } from '@/lib/actions/today'
+import { toggleDone, toggleSet, reorder, saveClientNote, importSheetBlock } from '@/lib/actions/today'
 import {
   circuitBlock,
   dissolveLonelyCircuits,
+  isEntryDone,
   nextCircuitId,
+  setCountOf,
+  withSetToggled,
   type ExerciseEntry,
 } from '@/lib/exercise'
 
@@ -71,26 +74,57 @@ export function TodayChecklist({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   )
 
-  const done = entries.filter((e) => e.done).length
+  const done = entries.filter((e) => isEntryDone(e)).length
 
   function toggle(index: number) {
-    // Optimistic flip
-    setEntries((prev) =>
-      prev.map((e, i) => (i === index ? { ...e, done: !e.done } : e)),
-    )
-    // Auto-advance: checking the focused card moves focus to the next unchecked
+    // Master checkbox = check ALL sets (or uncheck all when already done).
+    const current = entries[index]
+    const allDone = isEntryDone(current)
+    const n = setCountOf(current)
+    const nextEntry: ExerciseEntry = current.sets_done
+      ? {
+          ...current,
+          sets_done: Array.from(
+            { length: Math.max(current.sets_done.length, n) },
+            () => !allDone,
+          ),
+          done: !allDone,
+        }
+      : { ...current, done: !allDone }
+    // Optimistic update
+    setEntries((prev) => prev.map((e, i) => (i === index ? nextEntry : e)))
+    // Auto-advance: completing the focused card moves focus to the next uncompleted
     setFocused((currentFocus) => {
       if (currentFocus !== index) return currentFocus
-      const nowDone = !entries[index].done
-      if (!nowDone) return currentFocus
+      if (!isEntryDone(nextEntry)) return currentFocus
       for (let step = 1; step < entries.length; step++) {
         const j = (index + step) % entries.length
-        if (!entries[j].done && j !== index) return j
+        if (!isEntryDone(entries[j]) && j !== index) return j
       }
       return null
     })
+    startTransition(async () => {
+      if (!current.sets_done) {
+        // Legacy all-or-nothing entry — plain done flip keeps state consistent.
+        await toggleDone(dayId, index)
+        return
+      }
+      // Per-set entry: flip every set that differs from the target state.
+      for (let i = 0; i < Math.max(current.sets_done.length, n); i++) {
+        if ((current.sets_done[i] ?? false) === allDone) {
+          await toggleSet(dayId, index, i)
+        }
+      }
+    })
+  }
+
+  function toggleSetLocal(index: number, setIdx: number) {
+    // Optimistic per-set flip
+    setEntries((prev) =>
+      prev.map((e, i) => (i === index ? withSetToggled(e, setIdx) : e)),
+    )
     startTransition(() => {
-      toggleDone(dayId, index)
+      toggleSet(dayId, index, setIdx)
     })
   }
 
@@ -219,6 +253,7 @@ export function TodayChecklist({
                 focused={focused === index}
                 dimmed={focused != null && focused !== index}
                 onToggle={() => toggle(index)}
+                onToggleSet={(setIdx) => toggleSetLocal(index, setIdx)}
                 onFocus={() => setFocused((f) => (f === index ? null : index))}
                 onGroupWithNext={
                   isCircuit ? undefined : focused === index ? () => groupWithNext(index) : undefined
@@ -259,6 +294,7 @@ function ExerciseCard({
   focused,
   dimmed,
   onToggle,
+  onToggleSet,
   onFocus,
   onGroupWithNext,
   onUngroup,
@@ -269,6 +305,7 @@ function ExerciseCard({
   focused: boolean
   dimmed: boolean
   onToggle: () => void
+  onToggleSet: (setIdx: number) => void
   onFocus: () => void
   onGroupWithNext?: () => void
   onUngroup?: () => void
@@ -315,33 +352,33 @@ function ExerciseCard({
           ⠿
         </button>
 
-        {/* Checkbox */}
+        {/* Master checkbox — check/uncheck ALL sets */}
         <button
           type="button"
           role="checkbox"
-          aria-checked={entry.done}
-          aria-label={`Mark ${entry.name} ${entry.done ? 'not done' : 'done'}`}
+          aria-checked={isEntryDone(entry)}
+          aria-label={`Mark ${entry.name} ${isEntryDone(entry) ? 'not done' : 'done'}`}
           onClick={onToggle}
           className={`mt-1 size-6 shrink-0 border-2 flex items-center justify-center font-black ${
-            entry.done
+            isEntryDone(entry)
               ? 'bg-[var(--accent)] text-[var(--accent-ink)] border-[var(--accent)]'
               : 'border-[var(--border)] hover:border-[var(--accent)]'
           }`}
         >
-          {entry.done ? '✓' : ''}
+          {isEntryDone(entry) ? '✓' : ''}
         </button>
 
         <div className="flex-1 min-w-0" onClick={onFocus}>
           <div className="flex flex-wrap items-center gap-2">
             <h3
               className={`text-lg font-black uppercase ${
-                entry.done ? 'line-through opacity-60' : ''
+                isEntryDone(entry) ? 'line-through opacity-60' : ''
               }`}
             >
               {entry.name}
             </h3>
-            <span className="px-2 py-0.5 bg-[var(--accent)] text-[var(--accent-ink)] font-bold text-xs">
-              {entry.sets}×{entry.reps}
+            <span className="px-2 py-0.5 bg-[var(--info)] text-[var(--info-ink)] font-bold text-xs">
+              R: {entry.reps}
             </span>
             {entry.rest && (
               <span className="px-2 py-0.5 border border-[var(--border)] text-[var(--muted)] text-xs font-mono">
@@ -371,6 +408,34 @@ function ExerciseCard({
             rows={1}
             className="mt-2 w-full resize-none px-2 py-1.5 border border-[var(--border)] bg-[var(--background)] font-mono text-xs overflow-hidden"
           />
+        </div>
+
+        {/* Per-set checkboxes — right side of the header row */}
+        <div className="shrink-0 select-none" onClick={(e) => e.stopPropagation()}>
+          <div className="flex gap-1.5">
+            {Array.from({ length: setCountOf(entry) }, (_, i) => {
+              const checked = Boolean(entry.sets_done?.[i])
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <span className="font-mono text-[10px] text-[var(--muted)]">S{i + 1}</span>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    aria-label={`Set ${i + 1} of ${entry.name}`}
+                    onClick={() => onToggleSet(i)}
+                    className={`size-5 border-2 flex items-center justify-center text-[10px] font-black ${
+                      checked
+                        ? 'bg-[var(--accent)] text-[var(--accent-ink)] border-[var(--accent)]'
+                        : 'border-[var(--accent)] hover:bg-[var(--surface-2)]'
+                    }`}
+                  >
+                    {checked ? '✓' : ''}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import {
 import {
   carryOverByName,
   normalizeEntries,
+  withSetToggled,
   type ExerciseEntry,
 } from '@/lib/exercise'
 
@@ -58,6 +59,17 @@ export async function toggleDone(dayId: string, index: number): Promise<void> {
   const entries = normalizeEntries(ctx.day.exercises)
   if (index < 0 || index >= entries.length) throw new Error('Bad index')
   entries[index] = { ...entries[index], done: !entries[index].done }
+  await ctx.pb.collection('workout_days').update(dayId, { exercises: entries })
+  revalidateToday()
+}
+
+/** Toggle one per-set checkbox. Owner only. */
+export async function toggleSet(dayId: string, index: number, setIdx: number): Promise<void> {
+  const ctx = await getOwnDay(dayId)
+  if (!ctx) throw new Error('Forbidden')
+  const entries = normalizeEntries(ctx.day.exercises)
+  if (index < 0 || index >= entries.length) throw new Error('Bad index')
+  entries[index] = withSetToggled(entries[index], setIdx)
   await ctx.pb.collection('workout_days').update(dayId, { exercises: entries })
   revalidateToday()
 }

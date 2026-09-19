@@ -12,6 +12,9 @@
   --accent-strong: oklch(0.7 0.21 24);
   --accent-ink: oklch(0 0 0);
   --border: oklch(0.32 0.015 25);
+  /* Info blue — reps chip / secondary signal (distinct from accent red) */
+  --info: oklch(0.72 0.09 240);
+  --info-ink: oklch(0 0 0);
   --shadow-hard: 6px 6px 0 0 oklch(0.42 0.16 22);
 }
 
@@ -25,6 +28,8 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-ink: var(--accent-ink);
   --color-border: var(--border);
+  --color-info: var(--info);
+  --color-info-ink: var(--info-ink);
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-anton), var(--font-archivo), sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
