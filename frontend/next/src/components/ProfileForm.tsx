@@ -13,12 +13,18 @@ const ERROR_MESSAGES: Record<string, string> = {
 export function ProfileForm({
   name,
   mobile,
+  alias,
+  boardDisplay,
 }: {
   name: string
   mobile: string
+  alias: string
+  boardDisplay: string
 }) {
   const [result, setResult] = useState<UpdateProfileResult | null>(null)
   const [pending, startTransition] = useTransition()
+  const [aliasValue, setAliasValue] = useState(alias)
+  const hasAlias = aliasValue.trim().length > 0
 
   function handleSubmit(formData: FormData) {
     setResult(null)
@@ -60,6 +66,52 @@ export function ProfileForm({
             className="w-full min-h-11 px-3 bg-[var(--background)] border-2 border-[var(--border)] font-mono text-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           />
         </div>
+        <div>
+          <label htmlFor="profile-alias" className="block font-mono text-xs uppercase text-[var(--muted)] mb-1">
+            Leaderboard alias <span className="normal-case">(optional, max 40)</span>
+          </label>
+          <input
+            id="profile-alias"
+            name="alias"
+            type="text"
+            maxLength={40}
+            defaultValue={alias}
+            onChange={(e) => setAliasValue(e.target.value)}
+            className="w-full min-h-11 px-3 bg-[var(--background)] border-2 border-[var(--border)] font-mono text-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          />
+        </div>
+        <fieldset className="grid gap-2">
+          <legend className="font-mono text-xs uppercase text-[var(--muted)] mb-1">
+            Leaderboard display
+          </legend>
+          <label className="flex items-center gap-2 font-mono text-sm">
+            <input
+              type="radio"
+              name="board_display"
+              value="alias"
+              defaultChecked={boardDisplay !== 'name'}
+              disabled={!hasAlias}
+              className="accent-[var(--accent)]"
+            />
+            Show my alias
+          </label>
+          <label className="flex items-center gap-2 font-mono text-sm">
+            <input
+              type="radio"
+              name="board_display"
+              value="name"
+              defaultChecked={boardDisplay === 'name'}
+              disabled={!hasAlias}
+              className="accent-[var(--accent)]"
+            />
+            Show my real name
+          </label>
+          {!hasAlias ? (
+            <p className="font-mono text-xs text-[var(--muted)]">
+              Set an alias first to control board display.
+            </p>
+          ) : null}
+        </fieldset>
         <button
           type="submit"
           disabled={pending}

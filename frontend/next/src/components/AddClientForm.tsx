@@ -32,7 +32,7 @@ export function AddClientForm() {
   return (
     <section aria-label="Add client" className="border-2 border-[var(--border)] bg-[var(--surface)] p-4 mb-8">
       <h2 className="font-display text-2xl uppercase mb-4">Add client</h2>
-      <form action={handleSubmit} className="grid gap-3 md:grid-cols-[1fr_2fr_auto] items-end">
+      <form action={handleSubmit} className="grid gap-3 md:grid-cols-[1fr_2fr_1fr_auto] items-end">
         <div>
           <label htmlFor="client-email" className="block font-mono text-xs uppercase text-[var(--muted)] mb-1">
             Client email
@@ -56,6 +56,19 @@ export function AddClientForm() {
             type="url"
             required
             placeholder="https://docs.google.com/spreadsheets/d/..."
+            className="w-full min-h-11 px-3 bg-[var(--background)] border-2 border-[var(--border)] font-mono text-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          />
+        </div>
+        <div>
+          <label htmlFor="client-alias" className="block font-mono text-xs uppercase text-[var(--muted)] mb-1">
+            Leaderboard alias <span className="normal-case">(optional)</span>
+          </label>
+          <input
+            id="client-alias"
+            name="alias"
+            type="text"
+            maxLength={40}
+            placeholder="e.g. Falcon"
             className="w-full min-h-11 px-3 bg-[var(--background)] border-2 border-[var(--border)] font-mono text-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           />
         </div>

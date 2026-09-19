@@ -20,6 +20,10 @@ export default async function ProfilePage({
   const record = await pb.collection('users').getOne(user.id)
   const name = String(record.name ?? '')
   const mobile = String(record.mobile ?? '')
+  const alias = String(record.alias ?? '')
+  // PocketBase API-created selects may lose their default — treat missing or
+  // empty board_display as "alias".
+  const boardDisplay = String(record.board_display ?? '') === 'name' ? 'name' : 'alias'
 
   return (
     <>
@@ -36,7 +40,7 @@ export default async function ProfilePage({
           </p>
         ) : null}
 
-        <ProfileForm name={name} mobile={mobile} />
+        <ProfileForm name={name} mobile={mobile} alias={alias} boardDisplay={boardDisplay} />
       </main>
     </>
   )

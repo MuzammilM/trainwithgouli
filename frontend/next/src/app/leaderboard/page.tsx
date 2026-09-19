@@ -44,7 +44,7 @@ export default async function LeaderboardPage({
   // cannot enumerate users or other coaches' clients). Fail-soft: service
   // errors degrade to an empty board, never a crash.
   let entries: LiftEntry[] = []
-  let namesByEmail = new Map<string, string>()
+  let boardNamesByEmail = new Map<string, string>()
   let aggregationFailed = false
 
   try {
@@ -81,16 +81,28 @@ export default async function LeaderboardPage({
     entries = perClient.flat()
 
     // Display names: users lookup by email (batched || filter), else local-part.
+    // board_display may be missing/empty (PocketBase API-created selects can
+    // lose their default) — treat anything other than 'name' as 'alias'.
     const emails = [...new Set(entries.map((e) => e.email))]
     if (emails.length > 0) {
       try {
         const users = await admin.collection('users').getFullList({
           filter: emails.map((e) => `email = "${e}"`).join(' || '),
-          fields: 'email,name',
+          fields: 'email,name,alias,board_display',
         })
-        namesByEmail = new Map(users.map((u) => [u.email, u.name]))
+        boardNamesByEmail = new Map(
+          users.map((u) => {
+            const alias = String(u.alias ?? '').trim()
+            const name = String(u.name ?? '').trim()
+            const board =
+              alias && String(u.board_display ?? '') !== 'name'
+                ? alias
+                : name
+            return [u.email, board]
+          }),
+        )
       } catch {
-        namesByEmail = new Map()
+        boardNamesByEmail = new Map()
       }
     }
   } catch {
@@ -108,8 +120,8 @@ export default async function LeaderboardPage({
     .slice(0, 20)
 
   const displayName = (email: string) => {
-    const name = namesByEmail.get(email)
-    if (name) return name
+    const board = boardNamesByEmail.get(email)
+    if (board) return board
     return email.split('@')[0] || email
   }
 
