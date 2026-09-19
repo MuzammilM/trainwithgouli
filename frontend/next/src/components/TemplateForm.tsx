@@ -3,8 +3,9 @@
 import { useActionState, useState } from 'react'
 import { createTemplate, updateTemplate, type TemplateResult } from '@/lib/actions/templates'
 import { emptyEntry, type ExerciseEntry } from '@/lib/exercise'
+import { ExercisePicker, type PickerExercise } from '@/components/ExercisePicker'
 
-type ExerciseOption = { id: string; name: string }
+type ExerciseOption = PickerExercise
 
 /**
  * Template builder: name + dynamic exercise rows (exercise select, sets, reps,
@@ -60,19 +61,11 @@ export function TemplateForm({
           >
             <div className="col-span-12 md:col-span-4">
               <label className="block text-xs font-bold uppercase mb-1">Exercise *</label>
-              <select
-                value={row.name}
-                required
-                onChange={(e) => setRow(index, { name: e.target.value })}
-                className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)]"
-              >
-                <option value="">Select...</option>
-                {exercises.map((ex) => (
-                  <option key={ex.id} value={ex.name}>
-                    {ex.name}
-                  </option>
-                ))}
-              </select>
+              <ExercisePicker
+                exercises={exercises}
+                selectedName={row.name}
+                onSelect={(name) => setRow(index, { name })}
+              />
             </div>
             <div className="col-span-6 md:col-span-2">
               <label className="block text-xs font-bold uppercase mb-1">Sets</label>

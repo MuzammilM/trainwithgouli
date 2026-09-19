@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { BODY_PARTS } from '@/lib/body-parts'
+import { useState } from 'react'
+import { ExercisePicker } from '@/components/ExercisePicker'
 
 export interface Exercise {
   id: string
@@ -128,25 +128,12 @@ function DayRowFields({
   onChange: (index: number, patch: Partial<Row>) => void
   onRemove: (index: number) => void
 }) {
-  const [search, setSearch] = useState('')
-  const [chip, setChip] = useState<string | null>(null)
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    return exercises.filter((ex) => {
-      if (chip && !(Array.isArray(ex.body_part) && ex.body_part.includes(chip))) return false
-      if (q && !ex.name.toLowerCase().includes(q)) return false
-      return true
-    })
-  }, [exercises, search, chip])
-
   const last = row.exerciseName ? findLastLift(history, row.exerciseName) : null
 
-  function handleSelect(exerciseId: string) {
-    const ex = exercises.find((e) => e.id === exerciseId)
+  function handleSelect(exerciseName: string, ex?: Exercise) {
     onChange(index, {
-      exerciseId,
-      exerciseName: ex?.name ?? '',
+      exerciseId: ex?.id ?? '',
+      exerciseName,
       youtubeUrl: ex?.youtube_url ?? '',
     })
   }
@@ -157,18 +144,11 @@ function DayRowFields({
         <div className="col-span-12 md:col-span-4">
           <label className="block text-xs font-bold uppercase mb-1">Exercise *</label>
           <input type="hidden" name="exercise[]" value={row.exerciseName} />
-          <select
-            value={row.exerciseId}
-            onChange={(e) => handleSelect(e.target.value)}
-            className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)]"
-          >
-            <option value="">Select...</option>
-            {filtered.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
+          <ExercisePicker
+            exercises={exercises}
+            selectedName={row.exerciseName}
+            onSelect={handleSelect}
+          />
           {row.exerciseName && row.youtubeUrl && (
             <a
               href={row.youtubeUrl}
@@ -247,32 +227,6 @@ function DayRowFields({
             ×
           </button>
         </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-1.5">
-        {BODY_PARTS.map((part) => (
-          <button
-            key={part}
-            type="button"
-            onClick={() => setChip(chip === part ? null : part)}
-            aria-pressed={chip === part}
-            className={`font-mono text-[10px] uppercase border-2 px-2 py-1 ${
-              chip === part
-                ? 'border-[var(--accent)] text-[var(--accent)]'
-                : 'border-[var(--border)] hover:border-[var(--accent)]'
-            }`}
-          >
-            {part}
-          </button>
-        ))}
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search exercises…"
-          aria-label="Filter exercises"
-          className="w-full md:ml-auto md:w-40 px-2 py-1 border-2 border-[var(--border)] bg-[var(--surface)] font-mono text-xs order-first md:order-last"
-        />
       </div>
     </div>
   )

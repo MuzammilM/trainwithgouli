@@ -14,8 +14,8 @@ export default async function NewTemplatePage() {
   const pb = await serverClient()
   const exercises = (await pb.collection('exercises').getFullList({
     sort: 'name',
-    fields: 'id,name',
-  })) as unknown as { id: string; name: string }[]
+    fields: 'id,name,body_part',
+  })) as unknown as { id: string; name: string; body_part?: string[] | null }[]
 
   return (
     <>
