@@ -1,6 +1,7 @@
-const VERSION = '0.11.2'
+const VERSION = '0.11.3'
 
 const VERSION_HISTORY = [
+  { version: '0.11.3', date: '2026-09-19', description: 'PB date range filters — /today-client day lookup + saveDaySheet upsert' },
   { version: '0.11.2', date: '2026-09-19', description: 'Profile icon nav button to /profile in header' },
   { version: '0.11.1', date: '2026-09-19', description: 'Import client workout history from Google Sheet into /days' },
   { version: '0.11.0', date: '2026-09-19', description: 'Leaderboard alias: coach sets at addClient, user controls board display' },
