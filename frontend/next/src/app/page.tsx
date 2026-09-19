@@ -49,16 +49,16 @@ export default async function HomePage() {
             {user ? (
               <>
                 <Link
-                  href="/days/new"
+                  href="/today"
                   className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm text-center no-underline hover:bg-[var(--accent-strong)]"
                 >
-                  Log a workout
+                  {user.role === 'coach' ? "Today's assignments" : "Today's workout"}
                 </Link>
                 <Link
                   href="/days"
                   className="px-6 py-3 border-2 border-[var(--border)] font-black uppercase text-sm text-center no-underline hover:border-[var(--accent)] hover:text-[var(--accent)]"
                 >
-                  View logbook
+                  Logbook
                 </Link>
               </>
             ) : (
@@ -103,16 +103,16 @@ export default async function HomePage() {
               {user ? (
                 <>
                   <Link
-                    href="/days/new"
+                    href="/today"
                     className="px-6 py-3 bg-[var(--accent)] text-[var(--accent-ink)] font-black uppercase text-sm no-underline hover:bg-[var(--accent-strong)]"
                   >
-                    Log a workout
+                    {user.role === 'coach' ? "Today's assignments" : "Today's workout"}
                   </Link>
                   <Link
                     href="/days"
                     className="px-6 py-3 border-2 border-[var(--border)] font-black uppercase text-sm no-underline hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
-                    View logbook
+                    Logbook
                   </Link>
                 </>
               ) : (

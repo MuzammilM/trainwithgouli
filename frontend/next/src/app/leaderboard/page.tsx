@@ -117,7 +117,10 @@ export default async function LeaderboardPage({
     <>
       <Nav user={user} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full">
-        <h1 className="text-4xl font-black uppercase tracking-tighter mb-8">Leaderboard</h1>
+        <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Leaderboard</h1>
+        <p className="font-mono text-sm text-[var(--muted)] mb-8">
+          Biggest lifts across the crew.
+        </p>
 
         <form method="get" className="mb-8 flex items-end gap-3 max-w-md">
           <div className="flex-1">

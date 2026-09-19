@@ -26,7 +26,9 @@ export default async function ProfilePage({
       <Nav user={user} />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full">
         <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Profile</h1>
-        <p className="font-mono text-sm text-[var(--muted)] mb-8">{user.email}</p>
+        <p className="font-mono text-sm text-[var(--muted)] mb-8">
+          Your account details. · {user.email}
+        </p>
 
         {params.saved === '1' ? (
           <p role="status" className="mb-6 max-w-xl border-2 border-[var(--border)] px-3 py-2.5 font-mono text-sm">
