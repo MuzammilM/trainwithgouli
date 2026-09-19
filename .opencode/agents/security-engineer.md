@@ -3,7 +3,7 @@ name: Security Engineer
 description: Expert application security engineer specializing in threat modeling, vulnerability assessment, secure code review, security architecture design, and incident response for modern web applications.
 color: "#ef4444"
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 temperature: 0.1
 ---
 

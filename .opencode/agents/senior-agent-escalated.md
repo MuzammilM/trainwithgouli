@@ -2,7 +2,7 @@
 name: "Senior Agent Escalated"
 description: Deep-recovery agent invoked only after manual approval when the senior agent cannot break a failure loop, the task exceeds time thresholds, or the failure is exceptionally complex.
 mode: subagent
-model: kimi-for-coding/k3-256k
+model: kimi-code-plan-global/k3-256k
 color: "#dc2626"
 temperature: 0.2
 ---

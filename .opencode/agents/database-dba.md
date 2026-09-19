@@ -3,7 +3,7 @@ name: Database DBA
 description: Expert PostgreSQL/Supabase database administrator handling schema design, migrations, RLS policies, indexing, query optimization, and pre-deployment audit gating. Operates in design mode (during development) and audit mode (before production deploy).
 color: "#f59e0b"
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 temperature: 0.2
 ---
 

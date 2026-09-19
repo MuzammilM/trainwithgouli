@@ -2,7 +2,7 @@
 name: Orchestrator
 description: Orchestrates feature implementation across research, coding, and deployment subagents with intelligent model switching and approval workflows
 mode: primary
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 color: "#8b5cf6"
 temperature: 0.2
 ---

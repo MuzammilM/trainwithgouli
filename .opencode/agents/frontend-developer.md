@@ -3,7 +3,7 @@ name: Frontend Developer
 description: Expert frontend developer specializing in HTML, CSS, and vanilla JavaScript for static websites with a focus on accessibility, performance, and semantic markup.
 color: "#10b981"
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 temperature: 0.3
 ---
 

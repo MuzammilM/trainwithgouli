@@ -2,7 +2,7 @@
 name: "UI Implementer (Senior)"
 description: Senior variant of the UI Implementer for the most ambiguous, highest-stakes frontend work — novel design systems, complex multi-surface architecture, and make-or-break visual effects. Uses maximum reasoning budget.
 mode: subagent
-model: kimi-for-coding/k3-256k
+model: kimi-code-plan-global/k3-256k
 color: "#ec4899"
 temperature: 0.2
 ---

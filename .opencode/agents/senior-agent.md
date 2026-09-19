@@ -2,7 +2,7 @@
 name: "Senior Agent"
 description: Diagnoses subagent failures and runaway loops, then routes back to the original subagent with a fix plan, fixes directly when safe, or escalates to the user.
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 color: "#ef4444"
 temperature: 0.3
 ---

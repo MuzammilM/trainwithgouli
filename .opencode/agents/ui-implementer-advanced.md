@@ -2,7 +2,7 @@
 name: "UI Implementer (Advanced)"
 description: Advanced variant of the UI Implementer for ambiguous, cross-cutting, or high-stakes new frontend interfaces. Uses the impeccable design skill.
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 color: "#ec4899"
 temperature: 0.2
 ---

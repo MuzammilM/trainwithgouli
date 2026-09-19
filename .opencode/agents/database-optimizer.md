@@ -3,7 +3,7 @@ name: Database Optimizer
 description: Expert database specialist focusing on schema design, query optimization, indexing strategies, and performance tuning for PostgreSQL and Supabase.
 color: "#f59e0b"
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 temperature: 0.2
 ---
 

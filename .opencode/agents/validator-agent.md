@@ -2,7 +2,7 @@
 name: "Validator Agent"
 description: Validates the output of implementation subagents (especially changes-fixes-agent and android-developer) using a strong coding model to catch gaps, risks, and enhancement opportunities before downstream phases.
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 color: "#f59e0b"
 temperature: 0.3
 ---

@@ -2,7 +2,7 @@
 name: Rival
 description: Nitpicks proposed implementations from Plan agent, generates alternatives, and debates through iterations until optimal solution emerges
 mode: primary
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 color: "#dc2626"
 temperature: 0.3
 ---

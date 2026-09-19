@@ -3,7 +3,7 @@ name: Code Reviewer
 description: Expert code reviewer who provides constructive, actionable feedback focused on correctness, maintainability, security, and performance — not style preferences.
 color: "#a855f7"
 mode: subagent
-model: kimi-for-coding/kimi-for-coding
+model: kimi-code-plan-global/kimi-for-coding
 temperature: 0.3
 ---
 
