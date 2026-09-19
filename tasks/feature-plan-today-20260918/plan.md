@@ -1,22 +1,28 @@
-# Plan/Days/Today rework — feature-plan-today-20260918
+# Plan/Days/Today rework v2 — feature-plan-today-20260918 (PLANNING)
 
-## Schema (applied on dev02 by orchestrator)
-- DELETED empty legacy collections: workout_plans, plan_exercises, workout_sets, old workout_days (schema diverged from code; DayBuilder save path was broken anyway)
-- NEW workout_templates: name (text), exercises (json), created_by (relation users, cascade); rules: read = any authed, write = coach
-- NEW workout_days: user (relation, cascade), date (date), exercises (json), notes (text), created_by (relation), sheet_row_start (number), sheet_order (json); rules: read = self||coach, create = coach, update = self||coach, delete = coach
+## Schema (APPLIED on dev02)
+- DELETED empty legacy: workout_plans, plan_exercises, workout_sets, old workout_days
+- workout_templates: name, exercises(json), created_by → read any authed, write coach
+- workout_days: user(rel), date, exercises(json), notes, created_by, sheet_row_start(num), sheet_order(json) → read self||coach, create coach, update self||coach, delete coach
+- Entry shape: {name, weight?, sets, reps, rest, done, coach_notes, client_notes, circuit}
 
-## Exercise entry shape (exercises JSON array, both templates and days)
-{ name, weight?, sets, reps, rest, done: bool, coach_notes: string, client_notes: string, circuit: string|null }
+## Pages
+- /plan — coach template library (CRUD + reuse); clients read-only. Desc: "Reusable workout templates — build once, assign to any client."
+- /days — history: client own, coach all (expand user, fail-soft names). Desc: "Workout history — every day you've trained."
+- /today — ROLE REDIRECT: coach → /today-coach, client → /today-client
+- /today-coach — assignment console. Desc: "Build and assign workouts — they land on your client's Today."
+  - Client selector + date picker (default today)
+  - Existing day for client+date: exercise list w/ client progress, edit exercises (PB-only after creation; sheet note), delete assignment
+  - No day: build ad-hoc rows (exercise select/sets/reps/rest/coach notes) OR pick template → assign = create workout_days + appendDayBlock (8-col) + store rowStart/order
+- /today-client — checklist. Desc: "Today's assigned workout — check off exercises as you go."
+  - Focus mode (others 40%), strike on done, sets×reps accent chip, dnd reorder (@dnd-kit, circuits move as unit), create/dissolve circuits, client notes (PB + sheet col H best-effort), progress bar, auto-advance focus
 
-## Sheet format v2
-Headers: Date|Workouts|Weights|Repetition|Sets|Rest|Coach Notes|Client Notes (8 cols, cream bg)
-Banner/date merges A:H; exercise rows 8 cols; client-notes col written on save (best-effort); appendDayBlock returns first-exercise row number.
+## Sheet v2
+8 cols: Date|Workouts|Weights|Repetition|Sets|Rest|Coach Notes|Client Notes; merges A:H; appendDayBlock returns first-exercise row
 
-## Build scope
-1. sheets.ts: 8-col appendDayBlock + return rowStart; updateClientNoteCell helper
-2. /plan: coach template library (CRUD + assign to client+date → creates workout_days + sheet block); clients read-only
-3. /days: workout history for self (client) / all (coach)
-4. /today: assigned-workout checklist — focus mode, strike on done, highlighted sets×reps, @dnd-kit drag reorder (circuits move as unit), circuits create/remove UI, per-exercise client notes, progress bar, server actions (toggle/reorder/saveNote), best-effort sheet note sync
-5. Remove DayBuilder + old daysheet action; home CTAs → "Today's workout"/"Logbook"
-6. One-line page descriptions on Plan/Days/Today (+Clients/Leaderboard/Profile for consistency)
-7. Fixture tests updated for 8-col format; all green
+## Nav/home
+Nav "Today" → /today; home CTAs: coach "Today's assignments", client "Today's workout", both + "Logbook"
+
+## Verify
+build clean; fixtures green (8-col); no DayBuilder/daysheet leftovers
+## Release: 0.10.0
