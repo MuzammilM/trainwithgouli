@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { TodayChecklist } from '@/components/TodayChecklist'
-import { normalizeEntries } from '@/lib/exercise'
+import { normalizeEntries, nameMultisetsEqual } from '@/lib/exercise'
+import { fetchClientHistory } from '@/lib/google/sheets'
 
 type WorkoutDay = {
   id: string
@@ -13,6 +14,13 @@ type WorkoutDay = {
   notes: string | null
   sheet_row_start: number | null
   sheet_order: string[] | null
+}
+
+type ClientRecord = {
+  id: string
+  coach: string
+  email: string
+  sheet_id: string
 }
 
 export const metadata = { title: 'Today — client' }
@@ -38,6 +46,34 @@ export default async function TodayClientPage() {
     .getFirstListItem<WorkoutDay>(`user = "${user.id}" && date = "${today}"`)
     .catch(() => null)
 
+  // Sheet-vs-DB drift detection: the coach may have edited today's block
+  // directly in the Google Sheet. One cached fetchClientHistory call per page
+  // load (cache shared with other pages); any failure skips silently.
+  let sheetMismatch = false
+  let sheetCount = 0
+  let dbCount = 0
+  if (day) {
+    const dbEntries = normalizeEntries(day.exercises)
+    dbCount = dbEntries.length
+    try {
+      const client = await pb
+        .collection('clients')
+        .getFirstListItem<ClientRecord>(`email = "${user.email.trim().toLowerCase()}"`)
+        .catch(() => null)
+      if (client?.sheet_id) {
+        const history = await fetchClientHistory(client.sheet_id, client.email)
+        const todayRows = history.filter((r) => r.date === today)
+        sheetCount = todayRows.length
+        sheetMismatch = !nameMultisetsEqual(
+          todayRows.map((r) => r.exercise),
+          dbEntries.map((e) => e.name),
+        )
+      }
+    } catch {
+      // Fail-soft: no banner on sheet read failure.
+    }
+  }
+
   const isCoach = user.role === 'coach'
 
   return (
@@ -55,6 +91,9 @@ export default async function TodayClientPage() {
             initialEntries={normalizeEntries(day.exercises)}
             sheetRowStart={day.sheet_row_start}
             sheetOrder={day.sheet_order}
+            sheetMismatch={sheetMismatch}
+            sheetCount={sheetCount}
+            dbCount={dbCount}
           />
         ) : (
           <div className="space-y-3">

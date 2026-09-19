@@ -82,3 +82,35 @@ export function circuitBlock(entries: ExerciseEntry[], index: number): [number, 
   while (end < entries.length - 1 && entries[end + 1].circuit === id) end++
   return [start, end]
 }
+
+/**
+ * Carry over done/client_notes from previous entries into new entries by
+ * exercise-name match (first match wins; matched names are consumed so
+ * duplicate names don't all inherit the same state). New names get
+ * circuit: null. Returns a new array — mutates nothing.
+ */
+export function carryOverByName(
+  prev: ExerciseEntry[],
+  next: ExerciseEntry[],
+): ExerciseEntry[] {
+  const pool = prev.map((e) => ({ name: e.name.trim().toLowerCase(), done: e.done, client_notes: e.client_notes }))
+  return next.map((entry) => {
+    const key = entry.name.trim().toLowerCase()
+    const idx = pool.findIndex((p) => p.name === key)
+    if (idx === -1) return { ...entry, circuit: null }
+    const match = pool[idx]
+    pool.splice(idx, 1)
+    return { ...entry, done: match.done, client_notes: match.client_notes, circuit: null }
+  })
+}
+
+/**
+ * True when two name lists contain the same multiset of names
+ * (order-insensitive, case-insensitive, trimmed).
+ */
+export function nameMultisetsEqual(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const norm = (list: string[]) =>
+    list.map((n) => n.trim().toLowerCase()).sort().join('\u0000')
+  return norm(a) === norm(b)
+}

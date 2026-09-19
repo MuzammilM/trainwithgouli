@@ -2,7 +2,9 @@
 
 import { redirect } from 'next/navigation'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
+import { serviceClient } from '@/lib/pocketbase/admin'
 import { appendDayBlock, type DayRow } from '@/lib/google/sheets'
+import { carryOverByName, normalizeEntries, type ExerciseEntry } from '@/lib/exercise'
 
 export type SaveDayResult = { ok: true } | { ok: false; message: string }
 
@@ -11,6 +13,16 @@ type ClientRecord = {
   coach: string
   email: string
   sheet_id: string
+}
+
+type WorkoutDay = {
+  id: string
+  user: string
+  date: string
+  exercises: unknown
+  created_by: string
+  sheet_row_start: number | null
+  sheet_order: string[] | null
 }
 
 /**
@@ -80,10 +92,72 @@ export async function saveDaySheet(
     return { ok: false, message: 'Add at least one exercise with weight and reps.' }
   }
 
+  let rowStart = 0
   try {
-    await appendDayBlock(client.sheet_id, client.email, date, rows)
+    rowStart = await appendDayBlock(client.sheet_id, client.email, date, rows)
   } catch {
     return { ok: false, message: 'Could not write to the Google Sheet. Try again.' }
+  }
+
+  // Upsert the workout_days record so /today-client renders the assignment.
+  // The sheet write already succeeded — a PB failure must not break the save.
+  const clientEmail = client.email.trim().toLowerCase()
+  try {
+    const admin = await serviceClient()
+
+    // Resolve the client's users-record id by email (log-and-continue if absent).
+    let clientUserId: string | null = null
+    try {
+      const u = await admin
+        .collection('users')
+        .getFirstListItem(`email = "${clientEmail}"`, { fields: 'id' })
+      clientUserId = u.id
+    } catch {
+      console.warn(
+        `[saveDaySheet] no users record for ${clientEmail} — sheet saved, workout_days skipped`,
+      )
+    }
+
+    if (clientUserId) {
+      // Rebuild entries from the saved rows; carry over done/client_notes by name.
+      const fresh: ExerciseEntry[] = rows.map((r) => ({
+        name: r.exercise,
+        weight: r.weight ?? '',
+        sets: r.sets,
+        reps: r.reps,
+        rest: r.rest ?? '',
+        done: false,
+        coach_notes: r.coach_notes ?? '',
+        client_notes: '',
+        circuit: null,
+      }))
+
+      const existing = await admin
+        .collection('workout_days')
+        .getFirstListItem<WorkoutDay>(`user = "${clientUserId}" && date = "${date}"`)
+        .catch(() => null)
+
+      const sheetOrder = fresh.map((e) => e.name)
+      if (existing) {
+        const carried = carryOverByName(normalizeEntries(existing.exercises), fresh)
+        await admin.collection('workout_days').update(existing.id, {
+          exercises: carried,
+          sheet_row_start: rowStart > 0 ? rowStart : existing.sheet_row_start,
+          sheet_order: sheetOrder,
+        })
+      } else {
+        await admin.collection('workout_days').create({
+          user: clientUserId,
+          date,
+          exercises: fresh,
+          created_by: user.id,
+          sheet_row_start: rowStart > 0 ? rowStart : null,
+          sheet_order: sheetOrder,
+        })
+      }
+    }
+  } catch (err) {
+    console.warn('[saveDaySheet] workout_days upsert failed (sheet write kept):', err)
   }
 
   redirect('/today-coach?saved=1')

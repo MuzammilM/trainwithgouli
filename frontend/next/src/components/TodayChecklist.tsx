@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { toggleDone, reorder, saveClientNote } from '@/lib/actions/today'
+import { toggleDone, reorder, saveClientNote, importSheetBlock } from '@/lib/actions/today'
 import {
   circuitBlock,
   dissolveLonelyCircuits,
@@ -30,16 +30,42 @@ export function TodayChecklist({
   initialEntries,
   sheetRowStart,
   sheetOrder,
+  sheetMismatch = false,
+  sheetCount = 0,
+  dbCount = 0,
 }: {
   dayId: string
   initialEntries: ExerciseEntry[]
   sheetRowStart: number | null
   sheetOrder: string[] | null
+  sheetMismatch?: boolean
+  sheetCount?: number
+  dbCount?: number
 }) {
   const [entries, setEntries] = useState<ExerciseEntry[]>(initialEntries)
   const [focused, setFocused] = useState<number | null>(null)
+  const [showMismatch, setShowMismatch] = useState(sheetMismatch)
+  const [importing, setImporting] = useState(false)
+  const [importMessage, setImportMessage] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const day: DayInfo = { dayId, sheetRowStart, sheetOrder }
+
+  async function handleImport() {
+    setImporting(true)
+    setImportMessage(null)
+    try {
+      const res = await importSheetBlock(dayId)
+      if (res.ok) {
+        setShowMismatch(false)
+      } else {
+        setImportMessage(res.message ?? 'Import failed — try again.')
+      }
+    } catch {
+      setImportMessage('Import failed — try again.')
+    } finally {
+      setImporting(false)
+    }
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -136,6 +162,36 @@ export function TodayChecklist({
 
   return (
     <div className="space-y-4">
+      {/* Sheet-drift banner */}
+      {showMismatch && (
+        <div className="border-2 border-[var(--accent)] bg-[var(--surface-2)] p-4 space-y-3">
+          <p className="font-mono text-sm font-bold text-[var(--accent)]">
+            This workout was changed in the Google Sheet ({sheetCount} exercises there vs {dbCount}{' '}
+            here).
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleImport}
+              disabled={importing}
+              className="px-3 py-1.5 border-2 border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-ink)] text-xs font-bold uppercase disabled:opacity-50"
+            >
+              {importing ? 'Importing…' : 'Import from sheet'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMismatch(false)}
+              className="px-3 py-1.5 border-2 border-[var(--border)] text-xs font-bold uppercase hover:bg-[var(--surface-2)]"
+            >
+              Dismiss
+            </button>
+          </div>
+          {importMessage && (
+            <p className="font-mono text-xs text-[var(--accent)]">{importMessage}</p>
+          )}
+        </div>
+      )}
+
       {/* Progress */}
       <div>
         <div className="flex items-center justify-between font-mono text-xs text-[var(--muted)] mb-1">

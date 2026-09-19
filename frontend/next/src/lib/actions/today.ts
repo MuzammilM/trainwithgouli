@@ -3,8 +3,18 @@
 import { revalidatePath } from 'next/cache'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { serviceClient } from '@/lib/pocketbase/admin'
-import { appendDayBlock, updateClientNoteCell, type DayRow } from '@/lib/google/sheets'
-import { normalizeEntries, type ExerciseEntry } from '@/lib/exercise'
+import {
+  appendDayBlock,
+  clearHistoryCache,
+  fetchClientHistory,
+  updateClientNoteCell,
+  type DayRow,
+} from '@/lib/google/sheets'
+import {
+  carryOverByName,
+  normalizeEntries,
+  type ExerciseEntry,
+} from '@/lib/exercise'
 
 export type ActionResult = { ok: boolean; message?: string }
 
@@ -247,4 +257,69 @@ export async function deleteAssignment(dayId: string): Promise<void> {
   const pb = await serverClient()
   await pb.collection('workout_days').delete(dayId)
   revalidateToday()
+}
+
+/**
+ * One-click import: rebuild today's exercises from the client's Google Sheet
+ * block (the coach may have edited the sheet directly, drifting the DB).
+ * Owner only. Carries over done/client_notes by name match; keeps
+ * sheet_row_start, sets sheet_order to the block's names. Fail-soft: a sheet
+ * read failure returns an error message instead of throwing.
+ */
+export async function importSheetBlock(
+  dayId: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const ctx = await getOwnDay(dayId)
+  if (!ctx) throw new Error('Forbidden')
+  const { user, pb, day } = ctx
+
+  // Resolve the client's clients-record (sheet_id + email) by the user's email.
+  const client = await pb
+    .collection('clients')
+    .getFirstListItem<ClientRecord>(`email = "${user.email.trim().toLowerCase()}"`)
+    .catch(() => null)
+  if (!client?.sheet_id) {
+    return { ok: false, message: 'No Google Sheet linked to your account — nothing to import.' }
+  }
+
+  // Fresh read: drop the 5-min cache so direct sheet edits are visible.
+  try {
+    clearHistoryCache(client.sheet_id)
+    const history = await fetchClientHistory(client.sheet_id, client.email)
+
+    // Local-timezone today in ISO (matches the page's localIsoToday).
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+      now.getDate(),
+    ).padStart(2, '0')}`
+
+    const todayRows = history.filter((r) => r.date === today)
+    if (todayRows.length === 0) {
+      return { ok: false, message: 'No exercises for today found in the sheet.' }
+    }
+
+    const fresh: ExerciseEntry[] = todayRows.map((r) => ({
+      name: r.exercise,
+      weight: r.weight,
+      sets: r.sets || '1',
+      reps: r.reps,
+      rest: r.rest,
+      done: false,
+      coach_notes: '',
+      client_notes: '',
+      circuit: null,
+    }))
+    const carried = carryOverByName(normalizeEntries(day.exercises), fresh)
+
+    await pb.collection('workout_days').update(dayId, {
+      exercises: carried,
+      sheet_order: fresh.map((e) => e.name),
+      // sheet_row_start intentionally kept as-is.
+    })
+  } catch {
+    return { ok: false, message: 'Could not read the Google Sheet — try again.' }
+  }
+
+  revalidatePath('/today-client')
+  return { ok: true }
 }
