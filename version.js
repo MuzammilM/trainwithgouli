@@ -1,6 +1,7 @@
-const VERSION = '0.9.0'
+const VERSION = '0.10.0'
 
 const VERSION_HISTORY = [
+  { version: '0.10.0', date: '2026-09-18', description: 'Plan library, days history, today-coach console + today-client checklist' },
   { version: '0.9.0', date: '2026-09-18', description: 'Profile page + privacy hardening; leaderboard' },
   { version: '0.8.3', date: '2026-09-18', description: 'Mobile: vertical coach banner first, CTAs under it; desktop keeps HTML hero' },
   { version: '0.8.2', date: '2026-09-18', description: 'BJJ Blue Belt label correction' },
