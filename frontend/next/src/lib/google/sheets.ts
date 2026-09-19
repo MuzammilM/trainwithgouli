@@ -1,5 +1,11 @@
 import 'server-only'
 import { google } from 'googleapis'
+import { parseDdMmYyyy, type HistoryRow } from '@/lib/history'
+
+// Re-exported for existing callers; the implementations live in lib/history.ts
+// (pure, unit-testable, no googleapis dependency).
+export { parseDdMmYyyy } from '@/lib/history'
+export type { HistoryRow } from '@/lib/history'
 
 const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 const SHEETS_SCOPE_READWRITE = 'https://www.googleapis.com/auth/spreadsheets'
@@ -39,33 +45,6 @@ function getSheetsClient(writable = false) {
     throw new Error('missing-sa-config')
   }
   return google.sheets({ version: 'v4', auth })
-}
-
-export type HistoryRow = {
-  date: string
-  exercise: string
-  weight: string
-  reps: string
-  sets: string
-  rest: string
-}
-
-/**
- * Parse DD/MM/YYYY into an ISO date string (YYYY-MM-DD).
- * Returns null for anything that is not a valid calendar date.
- */
-export function parseDdMmYyyy(raw: string): string | null {
-  const m = raw.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
-  if (!m) return null
-  const day = Number(m[1])
-  const month = Number(m[2])
-  const year = Number(m[3])
-  if (month < 1 || month > 12 || day < 1 || day > 31) return null
-  const dt = new Date(Date.UTC(year, month - 1, day))
-  if (dt.getUTCFullYear() !== year || dt.getUTCMonth() !== month - 1 || dt.getUTCDate() !== day) {
-    return null
-  }
-  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
 /**
@@ -110,8 +89,8 @@ export function parseWeightKg(raw: string): number | null {
 }
 
 /**
- * Parse the fixed house format: a vertical stack of day-blocks in columns A–F
- * (Date | Workouts | Weights | Repetition | Sets | Rest).
+ * Parse the fixed house format: a vertical stack of day-blocks in columns A–H
+ * (Date | Workouts | Weights | Repetition | Sets | Rest | Coach Notes | Client Notes).
  *
  * Per block, top to bottom:
  * 1. Banner row: A = "Train with Harry Gouli" (merged) → ignored
@@ -131,6 +110,8 @@ export function parseHistory(values: string[][]): HistoryRow[] {
     const d = (raw[3] ?? '').trim()
     const e = (raw[4] ?? '').trim()
     const f = (raw[5] ?? '').trim()
+    const g = (raw[6] ?? '').trim()
+    const h = (raw[7] ?? '').trim()
 
     // Date header row: A holds a date, B empty → start new block
     if (a && !b) {
@@ -159,6 +140,8 @@ export function parseHistory(values: string[][]): HistoryRow[] {
       reps: d,
       sets: e,
       rest: f,
+      ...(g ? { coach_notes: g } : {}),
+      ...(h ? { client_notes: h } : {}),
     })
   }
 

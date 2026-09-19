@@ -5,6 +5,7 @@ import { serviceClient } from '@/lib/pocketbase/admin'
 import { Nav } from '@/components/Nav'
 import { AddClientForm } from '@/components/AddClientForm'
 import { removeClient } from '@/lib/actions/clients'
+import { ImportHistoryButton } from '@/components/ImportHistoryButton'
 
 type ClientRecord = {
   id: string
@@ -93,6 +94,7 @@ export default async function ClientsPage() {
                     Pending
                   </span>
                 )}
+                <ImportHistoryButton clientId={client.id} />
                 <form action={removeClient.bind(null, client.id)}>
                   <button
                     type="submit"

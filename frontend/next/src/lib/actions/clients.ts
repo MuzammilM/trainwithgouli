@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { getAuthUser } from '@/lib/pocketbase/server'
 import { serverClient } from '@/lib/pocketbase/server'
 import { serviceClient } from '@/lib/pocketbase/admin'
-import { verifySheetAccess } from '@/lib/google/sheets'
+import { verifySheetAccess, fetchClientHistory } from '@/lib/google/sheets'
+import { groupHistoryByDate, type HistoryRow } from '@/lib/history'
 
 export type AddClientResult =
   | { ok: true; account?: 'created' | 'existing' }
@@ -104,4 +105,113 @@ export async function removeClient(id: string): Promise<void> {
 
   await pb.collection('clients').delete(id)
   revalidatePath('/clients')
+}
+
+export type ImportHistoryResult =
+  | { ok: true; imported: number; skipped: number; errors: string[] }
+  | { ok: false; code: string }
+
+const IMPORT_ERROR_MESSAGES: Record<string, string> = {
+  forbidden: 'Not allowed.',
+  'client-not-found': 'Client record not found.',
+  'no-sheet': 'This client has no verified sheet yet.',
+  'user-not-found': 'No user account exists for this client email.',
+  'service-error': 'Service account unavailable — try again later.',
+  'sheet-error': 'Could not read the Google Sheet (access or format error).',
+}
+
+function errorMessage(code: string): string {
+  return IMPORT_ERROR_MESSAGES[code] ?? `Import failed (${code})`
+}
+
+/**
+ * Backfill /days history for one client from their Google Sheet (coach-only).
+ * Past data only: every imported day is created with done:true entries.
+ * Idempotent — a (user, date) that already has a workout_days record is
+ * skipped, never overwritten. Fail-soft per date: one bad block does not
+ * abort the rest; errors are collected and returned.
+ */
+export async function importClientHistory(clientId: string): Promise<ImportHistoryResult> {
+  const user = await getAuthUser()
+  if (!user || user.role !== 'coach') return { ok: false, code: 'forbidden' }
+
+  const pb = await serverClient()
+  let client: { coach: string; email: string; sheet_id: string }
+  try {
+    const rec = await pb.collection('clients').getOne(clientId)
+    client = { coach: rec.coach, email: rec.email, sheet_id: rec.sheet_id }
+  } catch {
+    return { ok: false, code: 'client-not-found' }
+  }
+  if (client.coach !== user.id) return { ok: false, code: 'forbidden' }
+  if (!client.sheet_id) return { ok: false, code: 'no-sheet' }
+
+  // Resolve the client's users-record id via the service client (a user token
+  // cannot enumerate other users under the tightened rules).
+  let userId: string
+  try {
+    const admin = await serviceClient()
+    const users = await admin.collection('users').getFullList({
+      filter: `email = "${client.email}"`,
+      fields: 'id',
+    })
+    if (users.length === 0) return { ok: false, code: 'user-not-found' }
+    userId = users[0].id
+  } catch {
+    return { ok: false, code: 'service-error' }
+  }
+
+  let rows: HistoryRow[]
+  try {
+    rows = await fetchClientHistory(client.sheet_id, client.email)
+  } catch {
+    return { ok: false, code: 'sheet-error' }
+  }
+
+  // Dates already in workout_days for this user (PB date fields serialize as
+  // "YYYY-MM-DD HH:MM:SS.000Z" — compare on the first 10 chars).
+  const existing = await pb.collection('workout_days').getFullList({
+    filter: `user = "${userId}"`,
+    fields: 'id,date',
+  })
+  const existingDates = new Set(existing.map((d) => String(d.date).slice(0, 10)))
+
+  let imported = 0
+  let skipped = 0
+  const errors: string[] = []
+
+  for (const group of groupHistoryByDate(rows)) {
+    if (existingDates.has(group.date)) {
+      skipped++
+      continue
+    }
+    try {
+      await pb.collection('workout_days').create({
+        user: userId,
+        date: group.date,
+        exercises: group.rows.map((r) => ({
+          name: r.exercise,
+          weight: r.weight,
+          sets: r.sets,
+          reps: r.reps,
+          rest: r.rest,
+          done: true, // past days are history
+          coach_notes: r.coach_notes ?? '',
+          client_notes: r.client_notes ?? '',
+          circuit: null,
+        })),
+        created_by: user.id,
+        sheet_row_start: null,
+        sheet_order: group.rows.map((r) => r.exercise),
+      })
+      imported++
+      existingDates.add(group.date)
+    } catch {
+      errors.push(`${group.date}: could not create the day record`)
+    }
+  }
+
+  revalidatePath('/clients')
+  revalidatePath('/days')
+  return { ok: true, imported, skipped, errors }
 }
