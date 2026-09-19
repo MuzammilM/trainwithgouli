@@ -47,11 +47,35 @@ export function Nav({
   user: { id: string; email?: string; name?: string; role?: string } | null
 }) {
   const isCoach = user?.role === 'coach'
+  const pathname = usePathname()
 
   return (
     <nav aria-label="Primary" className="sticky top-0 z-40 border-b-2 border-[var(--border)] bg-[var(--surface)]">
       <div className="max-w-5xl mx-auto px-4">
         <div className="flex items-center gap-3 md:gap-5 py-3">
+          <Link
+            href="/profile"
+            aria-label="Profile"
+            aria-current={pathname === '/profile' ? 'page' : undefined}
+            className={`inline-flex items-center min-h-11 transition-colors hover:text-[var(--accent)] ${
+              pathname === '/profile' ? 'text-[var(--accent)]' : 'text-[var(--muted)]'
+            }`}
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+            </svg>
+          </Link>
           <NavLinks user={user} className="hidden md:flex items-center gap-6 text-sm font-bold uppercase tracking-wide" />
           <div className="flex-1" />
           {user ? (
