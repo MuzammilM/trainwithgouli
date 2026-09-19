@@ -16,8 +16,8 @@ type WorkoutDay = {
 export const metadata = { title: 'Days' }
 
 function formatDay(iso: string): string {
-  const [y, m, d] = iso.split('-')
-  if (!y || !m || !d) return iso
+  const [y, m, d] = iso.slice(0, 10).split('-')
+  if (!y || !m || !d) return iso.slice(0, 10)
   const dt = new Date(Number(y), Number(m) - 1, Number(d))
   return dt.toLocaleDateString('en-GB', {
     weekday: 'short',
