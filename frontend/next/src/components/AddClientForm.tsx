@@ -70,7 +70,11 @@ export function AddClientForm() {
 
       {result?.ok ? (
         <p role="status" className="mt-3 border-2 border-[var(--border)] px-3 py-2.5 font-mono text-sm">
-          Client added — sheet verified.
+          {result.account === 'created'
+            ? 'Client added — login account ready.'
+            : result.account === 'existing'
+              ? 'Client added — login account already exists.'
+              : 'Client added — sheet verified.'}
         </p>
       ) : null}
 

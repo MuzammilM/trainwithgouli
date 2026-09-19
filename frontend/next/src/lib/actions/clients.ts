@@ -1,12 +1,14 @@
 'use server'
 
+import crypto from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { getAuthUser } from '@/lib/pocketbase/server'
 import { serverClient } from '@/lib/pocketbase/server'
+import { serviceClient } from '@/lib/pocketbase/admin'
 import { verifySheetAccess } from '@/lib/google/sheets'
 
 export type AddClientResult =
-  | { ok: true }
+  | { ok: true; account?: 'created' | 'existing' }
   | { ok: false; code: string }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -29,6 +31,34 @@ export async function addClient(formData: FormData): Promise<AddClientResult> {
     return { ok: false, code: access.code }
   }
 
+  // Ensure a users record exists for this email so the client can log in
+  // (OAuth2 auto-create is unreliable on PocketBase 0.40.4). Uses the service
+  // client — a user token cannot enumerate users under the tightened rules.
+  // Never blocks the client add: login allowlisting also checks clients records.
+  let account: 'created' | 'existing' | undefined
+  try {
+    const admin = await serviceClient()
+    const existing = await admin.collection('users').getFullList({
+      filter: `email = "${email}"`,
+      fields: 'id',
+    })
+    if (existing.length > 0) {
+      account = 'existing'
+    } else {
+      const password = crypto.randomBytes(10).toString('hex') // 20 chars
+      await admin.collection('users').create({
+        email,
+        role: 'client',
+        verified: true,
+        password,
+        passwordConfirm: password,
+      })
+      account = 'created'
+    }
+  } catch {
+    account = undefined
+  }
+
   const pb = await serverClient()
   await pb.collection('clients').create({
     coach: user.id,
@@ -40,7 +70,7 @@ export async function addClient(formData: FormData): Promise<AddClientResult> {
   })
 
   revalidatePath('/clients')
-  return { ok: true }
+  return { ok: true, account }
 }
 
 export async function removeClient(id: string): Promise<void> {

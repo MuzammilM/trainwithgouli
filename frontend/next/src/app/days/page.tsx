@@ -44,14 +44,22 @@ export default async function DaysPage() {
     setsByDay.set(set.workout_day_id, list)
   }
 
+  // Display names: under the tightened users rules a client-role token cannot
+  // enumerate other users — fail soft to 'Athlete' instead of crashing.
+  // Coaches still resolve names via the coach list/view rule.
   const userIds = [...new Set(days.map((day) => day.user_id))]
-  const users = userIds.length
-    ? await pb.collection('users').getFullList({
+  let userNames = new Map<string, string>()
+  if (userIds.length > 0) {
+    try {
+      const users = await pb.collection('users').getFullList({
         filter: userIds.map((id) => `id = "${id}"`).join(' || '),
         fields: 'id,name,email',
       })
-    : []
-  const userNames = new Map(users.map((u) => [u.id, u.name || u.email]))
+      userNames = new Map(users.map((u) => [u.id, u.name || u.email]))
+    } catch {
+      userNames = new Map()
+    }
+  }
 
   const isAdmin = user.role === 'coach'
 
@@ -81,7 +89,7 @@ export default async function DaysPage() {
                         {day.date}
                       </Link>
                       <p className="font-mono text-sm text-[var(--muted)]">
-                        {userNames.get(day.user_id) || 'Unknown'}
+                        {userNames.get(day.user_id) || 'Athlete'}
                         {daySets.length > 0 && ` · ${daySets.length} set${daySets.length === 1 ? '' : 's'}`}
                       </p>
                     </div>

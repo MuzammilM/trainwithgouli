@@ -10,7 +10,10 @@ const LINKS = [
   { href: '/days', label: 'Days' },
 ]
 
-const AUTH_LINKS = [{ href: '/today', label: 'Today' }]
+const AUTH_LINKS = [
+  { href: '/leaderboard', label: 'Leaderboard' },
+  { href: '/today', label: 'Today' },
+]
 
 const COACH_LINKS = [{ href: '/clients', label: 'Clients' }]
 
@@ -53,10 +56,13 @@ export function Nav({
           <div className="flex-1" />
           {user ? (
             <div className="flex items-center gap-3 min-w-0">
-              <span className="hidden sm:block font-mono text-xs text-[var(--muted)] truncate">
+              <Link
+                href="/profile"
+                className="hidden sm:block font-mono text-xs text-[var(--muted)] truncate hover:text-[var(--accent)]"
+              >
                 {user.name || user.email}
                 {isCoach ? ' [coach]' : ''}
-              </span>
+              </Link>
               <form action={logout}>
                 <button
                   type="submit"

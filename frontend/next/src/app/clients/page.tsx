@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
+import { serviceClient } from '@/lib/pocketbase/admin'
 import { Nav } from '@/components/Nav'
 import { AddClientForm } from '@/components/AddClientForm'
 import { removeClient } from '@/lib/actions/clients'
@@ -29,6 +30,25 @@ export default async function ClientsPage() {
     sort: '-created',
   })
 
+  // Resolve display names + mobile via the service client (a user token can
+  // no longer enumerate other users). Batched with one || filter; fail-soft.
+  const emails = [...new Set(clients.map((c) => c.email))]
+  const userByEmail = new Map<string, { name?: string; mobile?: string }>()
+  if (emails.length > 0) {
+    try {
+      const admin = await serviceClient()
+      const users = await admin.collection('users').getFullList({
+        filter: emails.map((e) => `email = "${e}"`).join(' || '),
+        fields: 'email,name,mobile',
+      })
+      for (const u of users) {
+        userByEmail.set(u.email, { name: u.name, mobile: u.mobile })
+      }
+    } catch {
+      // Service client unavailable — fall back to email-only display.
+    }
+  }
+
   return (
     <>
       <Nav user={user} />
@@ -39,12 +59,20 @@ export default async function ClientsPage() {
 
         {clients && clients.length > 0 ? (
           <div className="space-y-3">
-            {clients.map((client) => (
-              <article
-                key={client.id}
-                className="border-2 border-[var(--border)] bg-[var(--surface)] p-4 flex flex-wrap items-center gap-3"
-              >
-                <span className="font-mono text-sm flex-1 min-w-48">{client.email}</span>
+            {clients.map((client) => {
+              const u = userByEmail.get(client.email)
+              const detail = [u?.name, u?.mobile].filter(Boolean).join(' · ')
+              return (
+                <article
+                  key={client.id}
+                  className="border-2 border-[var(--border)] bg-[var(--surface)] p-4 flex flex-wrap items-center gap-3"
+                >
+                  <div className="flex-1 min-w-48">
+                    <span className="font-mono text-sm block">{client.email}</span>
+                    {detail ? (
+                      <span className="font-mono text-xs text-[var(--muted)]">{detail}</span>
+                    ) : null}
+                  </div>
                 <a
                   href={client.sheet_url}
                   target="_blank"
@@ -69,9 +97,10 @@ export default async function ClientsPage() {
                   >
                     Remove
                   </button>
-                </form>
-              </article>
-            ))}
+                  </form>
+                </article>
+              )
+            })}
           </div>
         ) : (
           <p className="font-mono text-[var(--muted)]">
