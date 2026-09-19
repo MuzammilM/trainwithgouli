@@ -1,6 +1,7 @@
-const VERSION = '0.10.1'
+const VERSION = '0.10.2'
 
 const VERSION_HISTORY = [
+  { version: '0.10.2', date: '2026-09-18', description: '/plans redirect; drop stale Supabase-era plans routes' },
   { version: '0.10.1', date: '2026-09-18', description: 'Restore DayBuilder at /today-coach (client select + last-lift guide + sheet write)' },
   { version: '0.10.0', date: '2026-09-18', description: 'Plan library, days history, today-coach console + today-client checklist' },
   { version: '0.9.0', date: '2026-09-18', description: 'Profile page + privacy hardening; leaderboard' },
