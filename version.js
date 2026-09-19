@@ -1,6 +1,7 @@
-const VERSION = '0.10.4'
+const VERSION = '0.11.0'
 
 const VERSION_HISTORY = [
+  { version: '0.11.0', date: '2026-09-19', description: 'Leaderboard alias: coach sets at addClient, user controls board display' },
   { version: '0.10.4', date: '2026-09-19', description: 'saveDaySheet upserts workout_days; today-client mismatch banner + sheet import' },
   { version: '0.10.3', date: '2026-09-19', description: 'Tag filters + search in plan template form (shared ExercisePicker)' },
   { version: '0.10.2', date: '2026-09-18', description: '/plans redirect; drop stale Supabase-era plans routes' },
