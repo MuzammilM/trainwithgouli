@@ -13,6 +13,7 @@ import {
 import {
   carryOverByName,
   normalizeEntries,
+  setCountOf,
   withSetToggled,
   type ExerciseEntry,
 } from '@/lib/exercise'
@@ -69,7 +70,31 @@ export async function toggleSet(dayId: string, index: number, setIdx: number): P
   if (!ctx) throw new Error('Forbidden')
   const entries = normalizeEntries(ctx.day.exercises)
   if (index < 0 || index >= entries.length) throw new Error('Bad index')
+  if (setIdx < 0 || setIdx >= setCountOf(entries[index])) throw new Error('Bad set index')
   entries[index] = withSetToggled(entries[index], setIdx)
+  await ctx.pb.collection('workout_days').update(dayId, { exercises: entries })
+  revalidateToday()
+}
+
+/**
+ * Check (value=true) or uncheck (value=false) ALL sets of one exercise in a
+ * single atomic write. Owner only. Used by the master checkbox for entries
+ * that already have per-set state.
+ */
+export async function setAllSets(
+  dayId: string,
+  index: number,
+  value: boolean,
+): Promise<void> {
+  const ctx = await getOwnDay(dayId)
+  if (!ctx) throw new Error('Forbidden')
+  const entries = normalizeEntries(ctx.day.exercises)
+  if (index < 0 || index >= entries.length) throw new Error('Bad index')
+  entries[index] = {
+    ...entries[index],
+    sets_done: Array.from({ length: setCountOf(entries[index]) }, () => value),
+    done: value,
+  }
   await ctx.pb.collection('workout_days').update(dayId, { exercises: entries })
   revalidateToday()
 }

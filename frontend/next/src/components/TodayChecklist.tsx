@@ -15,7 +15,14 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { toggleDone, toggleSet, reorder, saveClientNote, importSheetBlock } from '@/lib/actions/today'
+import {
+  setAllSets,
+  toggleDone,
+  toggleSet,
+  reorder,
+  saveClientNote,
+  importSheetBlock,
+} from '@/lib/actions/today'
 import {
   circuitBlock,
   dissolveLonelyCircuits,
@@ -84,10 +91,7 @@ export function TodayChecklist({
     const nextEntry: ExerciseEntry = current.sets_done
       ? {
           ...current,
-          sets_done: Array.from(
-            { length: Math.max(current.sets_done.length, n) },
-            () => !allDone,
-          ),
+          sets_done: Array.from({ length: n }, () => !allDone),
           done: !allDone,
         }
       : { ...current, done: !allDone }
@@ -103,18 +107,14 @@ export function TodayChecklist({
       }
       return null
     })
-    startTransition(async () => {
+    startTransition(() => {
       if (!current.sets_done) {
         // Legacy all-or-nothing entry — plain done flip keeps state consistent.
-        await toggleDone(dayId, index)
+        toggleDone(dayId, index)
         return
       }
-      // Per-set entry: flip every set that differs from the target state.
-      for (let i = 0; i < Math.max(current.sets_done.length, n); i++) {
-        if ((current.sets_done[i] ?? false) === allDone) {
-          await toggleSet(dayId, index, i)
-        }
-      }
+      // Per-set entry: one atomic all-sets write (clamped to setCountOf).
+      setAllSets(dayId, index, !allDone)
     })
   }
 
@@ -414,7 +414,8 @@ function ExerciseCard({
         <div className="shrink-0 select-none" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-1.5">
             {Array.from({ length: setCountOf(entry) }, (_, i) => {
-              const checked = Boolean(entry.sets_done?.[i])
+              // Legacy entries (no sets_done): derive from done (all-or-nothing).
+              const checked = entry.sets_done ? Boolean(entry.sets_done[i]) : entry.done
               return (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <span className="font-mono text-[10px] text-[var(--muted)]">S{i + 1}</span>
