@@ -33,6 +33,16 @@ function localIsoToday(): string {
   ).padStart(2, '0')}`
 }
 
+/** Local-timezone ISO date for the day after `iso` (YYYY-MM-DD). */
+function nextIsoDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  const dt = new Date(y, (m ?? 1) - 1, d ?? 1)
+  dt.setDate(dt.getDate() + 1)
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(
+    dt.getDate(),
+  ).padStart(2, '0')}`
+}
+
 export default async function TodayClientPage() {
   const user = await getAuthUser()
   if (!user) redirect('/login')
@@ -43,7 +53,9 @@ export default async function TodayClientPage() {
   // Own day for today (user token; rule self||coach — filter user=me).
   const day = await pb
     .collection('workout_days')
-    .getFirstListItem<WorkoutDay>(`user = "${user.id}" && date = "${today}"`)
+    .getFirstListItem<WorkoutDay>(
+      `user = "${user.id}" && date >= "${today} 00:00:00" && date < "${nextIsoDay(today)} 00:00:00"`,
+    )
     .catch(() => null)
 
   // Sheet-vs-DB drift detection: the coach may have edited today's block

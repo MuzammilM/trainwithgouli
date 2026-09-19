@@ -132,9 +132,15 @@ export async function saveDaySheet(
         circuit: null,
       }))
 
+      const [y, m, d] = date.split('-').map(Number)
+      const next = new Date(y, (m ?? 1) - 1, d ?? 1)
+      next.setDate(next.getDate() + 1)
+      const nextDate = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`
       const existing = await admin
         .collection('workout_days')
-        .getFirstListItem<WorkoutDay>(`user = "${clientUserId}" && date = "${date}"`)
+        .getFirstListItem<WorkoutDay>(
+          `user = "${clientUserId}" && date >= "${date} 00:00:00" && date < "${nextDate} 00:00:00"`,
+        )
         .catch(() => null)
 
       const sheetOrder = fresh.map((e) => e.name)
