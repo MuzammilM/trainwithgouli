@@ -135,21 +135,29 @@ export function TodayChecklist({
     })
   }
 
+  // Strict-adjacency successor of the block containing `index`, or -1 when
+  // there is none / the immediate successor is ineligible (done or already in
+  // a circuit) — no skipping ahead, which keeps circuit blocks contiguous.
+  function groupTarget(index: number): number {
+    const [, blockEnd] = circuitBlock(entries, index)
+    const target = blockEnd + 1
+    if (target >= entries.length) return -1
+    if (entries[target].done || entries[target].circuit) return -1
+    return target
+  }
+
   function groupWithNext(index: number) {
-    // Focused + next unchecked → shared circuit id
-    let target = -1
-    for (let step = 1; step < entries.length; step++) {
-      const j = index + step
-      if (j < entries.length && !entries[j].done && !entries[j].circuit) {
-        target = j
-        break
-      }
-    }
+    const target = groupTarget(index)
     if (target === -1) return
-    const id = nextCircuitId(entries)
-    const next = dissolveLonelyCircuits(
-      entries.map((e, i) => (i === index || i === target ? { ...e, circuit: id } : e)),
-    )
+    const existing = entries[index].circuit
+    const id = existing ?? nextCircuitId(entries)
+    // Absorb: reuse the block's id and append only the target; when starting a
+    // new circuit, stamp both index and target (yields 2+ members).
+    const next = entries.map((e, i) => {
+      if (i === target) return { ...e, circuit: id }
+      if (existing == null && i === index) return { ...e, circuit: id }
+      return e
+    })
     persist(next)
   }
 
@@ -257,7 +265,9 @@ export function TodayChecklist({
                 onToggleSet={(setIdx) => toggleSetLocal(index, setIdx)}
                 onFocus={() => setFocused((f) => (f === index ? null : index))}
                 onGroupWithNext={
-                  isCircuit ? undefined : focused === index ? () => groupWithNext(index) : undefined
+                  focused === index && groupTarget(index) !== -1
+                    ? () => groupWithNext(index)
+                    : undefined
                 }
                 onUngroup={isCircuit && focused === index ? () => ungroup(index) : undefined}
                 day={day}
