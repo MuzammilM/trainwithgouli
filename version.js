@@ -1,6 +1,7 @@
-const VERSION = '0.12.1'
+const VERSION = '0.12.2'
 
 const VERSION_HISTORY = [
+  { version: '0.12.2', date: '2026-09-20', description: 'Circuits of 3+ — GROUP WITH NEXT absorbs into an existing circuit' },
   { version: '0.12.1', date: '2026-09-20', description: 'DayBuilder sets fix — hidden input per row, no more defaulting to 1' },
   { version: '0.12.0', date: '2026-09-20', description: 'Queue 2026-0919b: /days date fix, per-set checkboxes + R: reps chip, circuit highlight, DayBuilder sets radio + reps slider' },
   { version: '0.11.3', date: '2026-09-19', description: 'PB date range filters — /today-client day lookup + saveDaySheet upsert' },
