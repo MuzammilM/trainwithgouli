@@ -263,7 +263,7 @@ export function TodayChecklist({
                 dimmed={focused != null && focused !== index}
                 onToggle={() => toggle(index)}
                 onToggleSet={(setIdx) => toggleSetLocal(index, setIdx)}
-                onFocus={() => setFocused((f) => (f === index ? null : index))}
+                onFocus={() => setFocused(index)}
                 onGroupWithNext={
                   focused === index && groupTarget(index) !== -1
                     ? () => groupWithNext(index)
@@ -344,6 +344,7 @@ function ExerciseCard({
   return (
     <div
       ref={setNodeRef}
+      onClick={onFocus}
       style={{
         transform: CSS.Translate.toString(transform),
         transition,
@@ -362,6 +363,7 @@ function ExerciseCard({
         <button
           type="button"
           aria-label={`Reorder ${entry.name}`}
+          onClick={(e) => e.stopPropagation()}
           {...attributes}
           {...listeners}
           className="mt-1 px-1.5 py-2 text-[var(--muted)] cursor-grab touch-none active:cursor-grabbing select-none"
@@ -385,7 +387,7 @@ function ExerciseCard({
           {isEntryDone(entry) ? '✓' : ''}
         </button>
 
-        <div className="flex-1 min-w-0" onClick={onFocus}>
+        <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3
               className={`text-lg font-black uppercase ${
@@ -459,7 +461,7 @@ function ExerciseCard({
 
       {/* Focus actions */}
       {focused && (
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2 flex gap-2" onClick={(e) => e.stopPropagation()}>
           {onGroupWithNext && (
             <button
               type="button"
