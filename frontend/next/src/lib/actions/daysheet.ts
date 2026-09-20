@@ -70,8 +70,10 @@ export async function saveDaySheet(
   const exercises = formData.getAll('exercise[]').map((v) => String(v).trim())
   const weights = formData.getAll('weight[]').map((v) => String(v).trim())
   const reps = formData.getAll('reps[]').map((v) => String(v).trim())
-  const sets = formData.getAll('sets[]').map((v) => String(v).trim() || '1')
+  const sets = formData.getAll('sets[]').map((v) => String(v).trim() || '3')
   const notes = formData.getAll('notes[]').map((v) => String(v).trim())
+
+  while (sets.length < exercises.length) sets.push('3')
 
   const rows: DayRow[] = []
   for (let i = 0; i < exercises.length; i++) {
@@ -83,7 +85,7 @@ export async function saveDaySheet(
       exercise,
       weight,
       reps: rep,
-      sets: sets[i] || '1',
+      sets: sets[i] || '3',
       rest: notes[i] || undefined,
     })
   }

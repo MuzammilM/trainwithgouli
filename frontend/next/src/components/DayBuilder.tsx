@@ -201,26 +201,22 @@ function DayRowFields({
         </div>
         <div className="col-span-12 md:col-span-2">
           <label className="block text-xs font-bold uppercase mb-1">Sets</label>
+          <input type="hidden" name="sets[]" value={row.sets} />
           <div className="flex gap-1" role="radiogroup" aria-label="Sets">
             {['3', '4', '5'].map((v) => (
-              <label
+              <button
                 key={v}
+                type="button"
+                aria-pressed={row.sets === v}
+                onClick={() => onChange(index, { sets: v })}
                 className={`flex-1 flex items-center justify-center py-2 border-2 font-mono font-bold cursor-pointer select-none ${
                   row.sets === v
                     ? 'bg-[var(--accent)] text-[var(--accent-ink)] border-[var(--accent)]'
                     : 'border-[var(--border)] hover:border-[var(--accent)]'
                 }`}
               >
-                <input
-                  type="radio"
-                  name="sets[]"
-                  value={v}
-                  checked={row.sets === v}
-                  onChange={() => onChange(index, { sets: v })}
-                  className="sr-only"
-                />
                 {v}
-              </label>
+              </button>
             ))}
           </div>
           {row.exerciseName && last && (
