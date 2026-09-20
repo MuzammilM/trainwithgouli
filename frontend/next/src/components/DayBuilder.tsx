@@ -34,8 +34,8 @@ const EMPTY_ROW: Row = {
   exerciseName: '',
   youtubeUrl: '',
   weight: '',
-  reps: '',
-  sets: '1',
+  reps: '10',
+  sets: '3',
   notes: '',
 }
 
@@ -181,14 +181,19 @@ function DayRowFields({
           )}
         </div>
         <div className="col-span-12 md:col-span-2">
-          <label className="block text-xs font-bold uppercase mb-1">Reps *</label>
+          <label className="block text-xs font-bold uppercase mb-1">
+            Reps * <span className="font-mono text-[11px]">R: {row.reps}</span>
+          </label>
           <input
-            type="text"
+            type="range"
             name="reps[]"
             required
+            min={3}
+            max={20}
+            step={1}
             value={row.reps}
             onChange={(e) => onChange(index, { reps: e.target.value })}
-            className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)] font-mono"
+            className="w-full accent-[var(--accent)]"
           />
           {row.exerciseName && last && (
             <span className="block mt-1 font-mono text-[11px] text-[var(--muted)]">Last: {last.reps}</span>
@@ -196,13 +201,28 @@ function DayRowFields({
         </div>
         <div className="col-span-12 md:col-span-2">
           <label className="block text-xs font-bold uppercase mb-1">Sets</label>
-          <input
-            type="text"
-            name="sets[]"
-            value={row.sets}
-            onChange={(e) => onChange(index, { sets: e.target.value })}
-            className="w-full px-2 py-2 border-2 border-[var(--border)] bg-[var(--surface)] font-mono"
-          />
+          <div className="flex gap-1" role="radiogroup" aria-label="Sets">
+            {['3', '4', '5'].map((v) => (
+              <label
+                key={v}
+                className={`flex-1 flex items-center justify-center py-2 border-2 font-mono font-bold cursor-pointer select-none ${
+                  row.sets === v
+                    ? 'bg-[var(--accent)] text-[var(--accent-ink)] border-[var(--accent)]'
+                    : 'border-[var(--border)] hover:border-[var(--accent)]'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="sets[]"
+                  value={v}
+                  checked={row.sets === v}
+                  onChange={() => onChange(index, { sets: v })}
+                  className="sr-only"
+                />
+                {v}
+              </label>
+            ))}
+          </div>
           {row.exerciseName && last && (
             <span className="block mt-1 font-mono text-[11px] text-[var(--muted)]">Last: {last.sets}</span>
           )}
