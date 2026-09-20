@@ -1,6 +1,7 @@
-const VERSION = '0.11.3'
+const VERSION = '0.12.0'
 
 const VERSION_HISTORY = [
+  { version: '0.12.0', date: '2026-09-20', description: 'Queue 2026-0919b: /days date fix, per-set checkboxes + R: reps chip, circuit highlight, DayBuilder sets radio + reps slider' },
   { version: '0.11.3', date: '2026-09-19', description: 'PB date range filters — /today-client day lookup + saveDaySheet upsert' },
   { version: '0.11.2', date: '2026-09-19', description: 'Profile icon nav button to /profile in header' },
   { version: '0.11.1', date: '2026-09-19', description: 'Import client workout history from Google Sheet into /days' },
