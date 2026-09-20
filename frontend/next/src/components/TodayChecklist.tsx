@@ -251,6 +251,7 @@ export function TodayChecklist({
                 index={index}
                 entry={entry}
                 focused={focused === index}
+                inCircuit={isCircuit}
                 dimmed={focused != null && focused !== index}
                 onToggle={() => toggle(index)}
                 onToggleSet={(setIdx) => toggleSetLocal(index, setIdx)}
@@ -292,6 +293,7 @@ function ExerciseCard({
   index,
   entry,
   focused,
+  inCircuit,
   dimmed,
   onToggle,
   onToggleSet,
@@ -303,6 +305,7 @@ function ExerciseCard({
   index: number
   entry: ExerciseEntry
   focused: boolean
+  inCircuit: boolean
   dimmed: boolean
   onToggle: () => void
   onToggleSet: (setIdx: number) => void
@@ -337,7 +340,11 @@ function ExerciseCard({
         opacity: isDragging ? 0.6 : undefined,
       }}
       className={`border-2 bg-[var(--surface)] p-4 transition-opacity ${
-        focused ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]' : 'border-[var(--border)]'
+        focused
+          ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]'
+          : inCircuit
+            ? 'border-[var(--accent)]'
+            : 'border-[var(--border)]'
       } ${dimmed ? 'opacity-40' : 'opacity-100'}`}
     >
       <div className="flex items-start gap-3">
