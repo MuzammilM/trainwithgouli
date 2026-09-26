@@ -22,7 +22,7 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 
 ## Model Configuration
 
-**ORCHESTRATOR_MODEL**: `kimi-for-coding/kimi-for-coding`
+**ORCHESTRATOR_MODEL**: `kimi-code-plan-global/kimi-for-coding`
 - Default for: Orchestrator
 - Use when: coordinating subagents, planning, approval workflows, time/loop management
 
@@ -34,11 +34,11 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 - Default for: `changes-fixes-agent-advanced`, `android-developer-advanced` (only agents with advanced variant)
 - Use when: user explicitly asks for advanced reasoning, OR ambiguous root-cause, cross-cutting architecture, novel algorithms, complex state machines, multi-step planning where extra reasoning budget materially helps
 
-**SENIOR_MODEL**: `kimi-for-coding/kimi-for-coding`
+**SENIOR_MODEL**: `kimi-code-plan-global/kimi-for-coding`
 - Default for: `senior-agent`, `validator-agent`
 - Use when: diagnosing subagent failures, planning recovery, breaking local retry loops, validating implementation output
 
-**ESCALATED_MODEL**: `kimi-for-coding/k3-256k`
+**ESCALATED_MODEL**: `kimi-code-plan-global/k3-256k`
 - Default for: `senior-agent-escalated`
 - Use when: deep recovery after senior-agent failed, hard time threshold exceeded, or runaway loop detected
 - **REQUIRES explicit manual approval before every invocation**
@@ -71,12 +71,12 @@ Coordinates subagents in sequence with approval checkpoints, intelligent model s
 - Stay on upgraded model until subagent completes; revert to default after
 
 **Thin-Shell Architecture (2026-07-13)**: opencode caches agent definitions (incl. `model:`) at startup — runtime model swaps do NOT work mid-session. Models baked into static agent files:
-- `changes-fixes-agent.md` / `android-developer.md` / `ui-implementer.md` — `kimi-for-coding/kimi-for-coding` shells (standard, fallback)
-- `changes-fixes-agent-advanced.md` / `android-developer-advanced.md` / `ui-implementer-advanced.md` — `kimi-for-coding/kimi-for-coding` shells (advanced)
+- `changes-fixes-agent.md` / `android-developer.md` / `ui-implementer.md` — `kimi-code-plan-global/kimi-for-coding` shells (standard, fallback)
+- `changes-fixes-agent-advanced.md` / `android-developer-advanced.md` / `ui-implementer-advanced.md` — `kimi-code-plan-global/kimi-for-coding` shells (advanced)
 - `changes-fixes-agent-trivial.md` / `android-developer-trivial.md` / `ui-implementer-trivial.md` — `opencode-go/deepseek-v4.1-flash` shells (trivial only)
-- `validator-agent.md` — `kimi-for-coding/kimi-for-coding` shell
-- `senior-agent.md` — `kimi-for-coding/kimi-for-coding` shell
-- `senior-agent-escalated.md` — `kimi-for-coding/k3-256k` shell (manual approval required)
+- `validator-agent.md` — `kimi-code-plan-global/kimi-for-coding` shell
+- `senior-agent.md` — `kimi-code-plan-global/kimi-for-coding` shell
+- `senior-agent-escalated.md` — `kimi-code-plan-global/k3-256k` shell (manual approval required)
 - Shell bodies are pointers reading full instructions at runtime from `.opencode/agents/_shared/{role}.logic.md` — logic-file edits apply at next dispatch, all shells, no restart
 - 4 mechanical agents (git-worktree-operations, deploy-agent, backup-rollback-agent, analytics-seo-agent) carry `opencode-go/deepseek-v4.1-flash` directly in frontmatter
 - NEVER edit agent file `model:` at dispatch time; select right agent file instead
@@ -704,7 +704,7 @@ IF total_elapsed_seconds > hard_threshold_seconds:
   Log: "Hard time threshold exceeded. Pausing for senior-agent-escalated approval."
   STOP — do not dispatch the next subagent
   Request user approval:
-    "Total elapsed time has exceeded the hard threshold for this {task_type} task. Invoke senior-agent-escalated (kimi-for-coding/k3-256k) for deep recovery? Reply with 'approve escalation' to proceed, or 'abort' to stop."
+    "Total elapsed time has exceeded the hard threshold for this {task_type} task. Invoke senior-agent-escalated (kimi-code-plan-global/k3-256k) for deep recovery? Reply with 'approve escalation' to proceed, or 'abort' to stop."
   Wait for message containing "approve escalation" before invoking senior-agent-escalated
   IF user aborts: stop orchestration
 
@@ -1018,7 +1018,7 @@ Include: subagent, error_type, task_id, model_switched, failure details, root ca
 - **Changes → Deploy:** Summary saved to `implementation-summary.md`
 - **Subagent → Senior:** On repeated failure or validator BLOCK, pass state, output, and validation report to `senior-agent`.
 - **Senior → Escalated:** If senior-agent cannot break the loop or hard time threshold is exceeded, request approval and invoke `senior-agent-escalated` with full history.
-- **Deploy → Gateway Reload:** If the deployment changes routing, domains, or upstreams, delegate to `nginx-gateway-agent` to reload or reconfigure the shared gateway
+- **Deploy → Gateway Reload:** If the deployment changes routing, domains, or upstreams, delegate to `nginx-gateway-agent` to reload or reconfigure the shared gateway. Also reload after ANY container recreate on shared dev — the gateway resolves upstream container names to IPs at config load; a recreated container gets a new IP → 502 until `cd /opt/nginx-gateway && ENV=dev podman-compose exec nginx nginx -s reload` (learning 2026-09-26, feature-social-share-card)
 - **Deploy → Worktree Cleanup:** After successful deployment, delegate to `git-worktree-operations` to merge, push, and cleanup
 - **Worktree Cleanup Pre-Check:** Before invoking `git-worktree-operations` for merge/push, check the **main repository** for uncommitted changes (e.g., deployment artifacts like `infra/ansible/inventory/*.yml`, executable-bit changes on deploy scripts). Either commit them first or instruct the worktree agent to commit/stash them before merge to avoid merge conflicts.
 - **All phases:** Update `execution-log.md` and `user-checkpoints.md`
@@ -1176,7 +1176,7 @@ When the Kimi Code Console is accessible and the user asks for usage tracking, t
 | **android-developer-advanced** | ADVANCED_MODEL (opencode-go/glm-5.3-flash, complex tasks) | same as base; architecture/performance debugging | implementation-summary.md |
 | **ui-implementer** | SENIOR_MODEL (standard non-trivial) | task_type, description, target surface, worktree_path | implementation-summary.md |
 | **ui-implementer-trivial** | EDITOR_MODEL (trivial only) | same as base; fully-specified small UI tweaks | implementation-summary.md |
-| **ui-implementer-advanced** | SENIOR_MODEL (kimi-for-coding/kimi-for-coding, complex tasks) | same as base; ambiguous/cross-cutting UI | implementation-summary.md |
+| **ui-implementer-advanced** | SENIOR_MODEL (kimi-code-plan-global/kimi-for-coding, complex tasks) | same as base; ambiguous/cross-cutting UI | implementation-summary.md |
 | **validator-agent** | SENIOR_MODEL | task_id, previous_subagent, task_description, worktree_path | validation-report-{subagent}.md |
 | **senior-agent** | SENIOR_MODEL | task_id, failed_subagent, error_summary, retry_count, elapsed_seconds | senior-assessment.md |
 | **senior-agent-escalated** | ESCALATED_MODEL (manual approval) | task_id, trigger, full history, elapsed_seconds | senior-escalated-assessment.md |
@@ -1222,10 +1222,18 @@ A "Tool execution aborted" / "Task cancelled" result on a dispatched task is als
 1. Log the condition to `learnings/` and `execution-log.md`
 2. Pause orchestration
 3. Request user approval for `senior-agent-escalated`:
-   - "A loop / repeated validator BLOCK / hard time threshold has been detected. Invoke senior-agent-escalated (kimi-for-coding/k3-256k) for deep recovery? Reply with 'approve escalation' to proceed, or 'abort' to stop."
+   - "A loop / repeated validator BLOCK / hard time threshold has been detected. Invoke senior-agent-escalated (kimi-code-plan-global/k3-256k) for deep recovery? Reply with 'approve escalation' to proceed, or 'abort' to stop."
    - Only messages containing **"approve escalation"** authorize invocation
 4. If approved, invoke `senior-agent-escalated`
 5. If aborted, stop orchestration and present current state to user
+
+### Cancelled / Looped Dispatch / Empty Result (learning 2026-09-26, feature-social-share-card)
+
+A `Task cancelled` / "kept getting looped" result is session-related (agent cache), not a reasoning failure:
+
+1. Retry the SAME dispatch once (user may decline an opencode restart).
+2. If cancelled again, do bounded work inline (orchestrator Read/Grep/Bash) instead of burning dispatches.
+3. **An empty `task_result` on a "completed" task is not trustworthy** — immediately run `git status` / `git log` in the worktree and review the diff before any merge. Verify build/lint claims yourself; assume visual-verification claims are false until evidence is shown.
 
 ### Critical Failure (unrecoverable)
 
