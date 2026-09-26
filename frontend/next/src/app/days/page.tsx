@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Share2 } from 'lucide-react'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
 import { Nav } from '@/components/Nav'
 import { normalizeEntries } from '@/lib/exercise'
@@ -67,12 +68,20 @@ export default async function DaysPage() {
                   key={day.id}
                   className="border-2 border-[var(--border)] bg-[var(--surface)] p-4"
                 >
-                  <div className="flex flex-wrap items-baseline gap-x-3">
+                  <div className="flex flex-wrap items-center gap-x-3">
                     <h2 className="text-xl font-black uppercase">{formatDay(day.date)}</h2>
                     <span className="font-mono text-xs text-[var(--muted)]">
                       {isCoach ? `${nameOf(day)} · ` : ''}
                       {done}/{entries.length} done
                     </span>
+                    <Link
+                      href={`/share/${day.date.slice(0, 10)}`}
+                      aria-label={`Share ${formatDay(day.date)} card`}
+                      title="Share this day"
+                      className="ml-auto inline-flex items-center justify-center border-2 border-[var(--border)] p-1.5 text-[var(--muted)] no-underline transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                    >
+                      <Share2 size={16} aria-hidden="true" />
+                    </Link>
                   </div>
                   {entries.length > 0 && (
                     <ul className="mt-2 font-mono text-sm text-[var(--muted)] space-y-0.5">

@@ -92,10 +92,22 @@ export default async function TodayClientPage() {
     <>
       <Nav user={user} />
       <main className="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
-        <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Today</h1>
-        <p className="font-mono text-sm text-[var(--muted)] mb-8">
-          Today&apos;s assigned workout — check off exercises as you go.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Today</h1>
+            <p className="font-mono text-sm text-[var(--muted)] mb-8">
+              Today&apos;s assigned workout — check off exercises as you go.
+            </p>
+          </div>
+          {day && (
+            <Link
+              href={`/share/${today}`}
+              className="mt-1 inline-block shrink-0 border-2 border-[var(--border)] px-4 py-2 font-mono text-sm font-bold uppercase no-underline transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
+            >
+              Share day
+            </Link>
+          )}
+        </div>
 
         {day ? (
           <TodayChecklist
