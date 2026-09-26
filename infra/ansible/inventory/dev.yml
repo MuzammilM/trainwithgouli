@@ -12,7 +12,9 @@ all:
         env: dev
         domain: server01.taild68ded.ts.net
         cert_type: tailscale
-        deploy_dir: /opt/trainwithgouli
+        # Rootless podman host — /opt is not writable; the app lives in the
+        # user's home (matches the google_sa.json volume mount in docker-compose.yml).
+        deploy_dir: /home/mz/trainwithgouli
         certs_dir: "{{ deploy_dir }}/certs"
         app_name: trainwithgouli
         dockerhub_username: "{{ vault_dockerhub_username | default('') }}"

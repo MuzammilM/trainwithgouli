@@ -63,13 +63,13 @@
 
 - name: Copy docker-compose file
   copy:
-    src: "{{ playbook_dir }}/../../deploy/docker-compose.yml"
+    src: "{{ playbook_dir }}/../../../deploy/docker-compose.yml"
     dest: "{{ deploy_dir }}/docker-compose.yml"
     mode: '0644'
 
 - name: Copy nginx proxy config
   copy:
-    src: "{{ playbook_dir }}/../../deploy/nginx-proxy.conf"
+    src: "{{ playbook_dir }}/../../../deploy/nginx-proxy.conf"
     dest: "{{ deploy_dir }}/nginx-proxy.conf"
     mode: '0644'
 
