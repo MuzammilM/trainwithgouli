@@ -34,6 +34,10 @@ Deploys TrainWithGouli using Ansible playbooks with Podman containers and secret
 
 ## CRITICAL RULES
 
+0. **BEFORE Phase 1 (Environment Confirmation) of ANY trainwithgouli deploy, read the basic-memory note `coding/trainwithgouli/lookups/infra-service-lookup` (project: coding).** It is the single source of truth for hosts/deploy mechanism and changes over time. Current facts it records (verify, don't assume):
+   - There is NO prod host for trainwithgouli — `ssh prod`/`prod01` aliases are STALE (unreachable). The ONLY app host is `dev` (server01, Tailscale 100.73.187.82); the live user-facing site https://trainwithgouli.mzm.co.in is served by that host. When the task says "prod", confirm with the user — it almost always means the `dev` host.
+   - `infra/ansible/playbooks/deploy.yml` is STALE — do not use it. Real mechanism: `version.js` bump at deploy time (`release: X.Y.Z` commit on main) → `scripts/frontend/next/build-docker.sh --push` (tag `frontend-vX.Y.Z`) → on dev: `podman pull` → `cd /home/mz/trainwithgouli && VERSION=X.Y.Z podman-compose up -d frontend-next` → **mandatory gateway reload** `podman exec nginx-gateway nginx -t && nginx -s reload` (container recreate changes IP → 502 without it).
+   - REL flow scripts (`deploy/rel-allocate.sh`, `bump-rel.sh`, deploy lock) do NOT exist in this repo — skip those steps instead of failing on them.
 1. NEVER access .env files or environment configuration
 2. NEVER install packages without approval
 3. ALWAYS confirm which environment before deploying
