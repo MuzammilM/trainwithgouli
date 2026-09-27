@@ -2,9 +2,9 @@
 
 | # | Item | Type | Status | Task ID |
 |---|------|------|--------|---------|
-| Q-1 | Streak counter tile (week starts Mon, target 5/wk, e.g. Mon+Thu+Fri = 3/5) replacing WORKING SETS + TOTAL REPS | feature | pending | feature-week-streak-tile-20260927 |
-| Q-2 | Explain progress-bar logic | question | pending | — (answered in chat) |
-| Q-3 | Two shareable card versions w/ toggle; v2 = no exercise list, bigger central heatmap | feature | pending | feature-share-card-variants-20260927 |
+| Q-1 | Streak counter tile (week starts Mon, target 5/wk) replacing WORKING SETS + TOTAL REPS | feature | completed | feature-week-streak-tile-20260927 |
+| Q-2 | Explain progress-bar logic | question | completed | — answered in chat |
+| Q-3 | Two shareable card versions w/ toggle; v2 = no exercise list, bigger central heatmap | feature | completed | feature-share-card-variants-20260927 |
 
 ## Q-1 design
 - Count distinct local dates Mon–Sun (current week) with a workout_day having ≥1 done entry
