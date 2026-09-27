@@ -8,7 +8,7 @@
  */
 import { forwardRef } from 'react'
 import Image from 'next/image'
-import { BodySilhouette, type BodySide } from '@/components/BodySilhouette'
+import { MuscleMap } from '@/components/MuscleMap'
 import {
   FOCUS_BUCKETS,
   FOCUS_LABELS,
@@ -33,6 +33,11 @@ export type ShareCardProps = {
   sessionTitle: string
   stats: ShareStats
   entries: ExerciseEntry[]
+  /**
+   * Session duration in minutes. Hardcoded by the page until the app tracks
+   * session timing (rendered as the DURATION tile).
+   */
+  durationMin: number
 }
 
 /** Region intensity per heatmap region, from bucket intensity. */
@@ -55,7 +60,7 @@ function tableRows(entries: ExerciseEntry[]): {
 }
 
 export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
-  function ShareCard({ name, date, sessionTitle, stats, entries }, ref) {
+  function ShareCard({ name, date, sessionTitle, stats, entries, durationMin }, ref) {
     const { rows, hidden } = tableRows(entries)
     const heat = regionIntensity(stats)
     const maxBucketSets = Math.max(
@@ -64,12 +69,12 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
     )
 
     // Exercise list auto-scale: the table zone (y 888..1425) holds a heading,
-    // column header, and up to 14 rows; shrink rows as the count grows, then
-    // cap with "+N MORE".
+    // column header, and up to 14 rows. Rows cap at a comfortable 44px so
+    // short days stay compact like the mockup; beyond 14, cap with "+N MORE".
     const rowCount = rows.length + (hidden > 0 ? 1 : 0)
-    const rowH = rowCount > 0 ? Math.floor(442 / rowCount) : 0
-    const nameSize = rowH >= 26 ? 18 : rowH >= 20 ? 16 : rowH >= 16 ? 14 : rowH >= 12 ? 12 : 10
-    const numSize = rowH >= 20 ? 13 : rowH >= 16 ? 12 : 11
+    const rowH = rowCount > 0 ? Math.max(28, Math.min(44, Math.floor(442 / rowCount))) : 0
+    const nameSize = rowH >= 40 ? 17 : rowH >= 34 ? 15 : rowH >= 28 ? 13 : 11
+    const numSize = rowH >= 40 ? 12 : rowH >= 34 ? 11 : 10
 
     return (
       <div
@@ -104,32 +109,33 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
           </div>
         </div>
 
-        {/* ── Session title (y 225..395, zone A ends at divider y=410) ───── */}
-        <div
-          className="absolute left-[51px] top-[225px] font-display uppercase leading-[0.95] text-[oklch(0.945_0.012_60)]"
-          style={{ fontSize: 56, letterSpacing: '0.005em' }}
-        >
-          {sessionTitle}
-        </div>
-        <div
-          className="absolute left-[51px] top-[302px] font-display uppercase leading-[0.95] text-[oklch(0.64_0.2_22)]"
-          style={{ fontSize: 56, letterSpacing: '0.005em' }}
-        >
-          TRAINING SESSION
+        {/* ── Session title (stacked block, zone A ends at divider y=410) ── */}
+        <div className="absolute left-[51px] top-[222px] w-[580px]">
+          <div
+            className="font-display uppercase leading-[0.95] text-[oklch(0.945_0.012_60)]"
+            style={{ fontSize: 52, letterSpacing: '0.005em' }}
+          >
+            {sessionTitle}
+          </div>
+          <div
+            className="font-display mt-2 uppercase leading-[0.95] text-[oklch(0.64_0.2_22)]"
+            style={{ fontSize: 52, letterSpacing: '0.005em' }}
+          >
+            TRAINING SESSION
+          </div>
         </div>
 
-        {/* ── Stat tiles (y 415..885) ───────────────────────────────────── */}
+        {/* ── Stat tiles (zone B top, y 470..590) ───────────────────────── */}
         <div className="absolute left-[51px] top-[470px] flex w-[840px] justify-between">
-          {[
-            { label: 'EXERCISES', value: String(stats.exerciseCount) },
-            { label: 'WORKING SETS', value: String(stats.totalSets) },
-            {
-              label: 'TOTAL VOLUME',
-              value: stats.totalVolume > 0 ? `${stats.totalVolume.toLocaleString('en-IN')} KG` : '—',
-            },
-            { label: 'TOTAL REPS', value: String(stats.totalReps) },
-          ].map((tile) => (
-            <div key={tile.label} className="w-[190px]">
+          {(
+            [
+              { label: 'EXERCISES', value: String(stats.exerciseCount) },
+              { label: 'WORKING SETS', value: String(stats.totalSets) },
+              { label: 'TOTAL REPS', value: String(stats.totalReps) },
+              { label: 'DURATION', value: String(durationMin), unit: 'MIN' },
+            ] as { label: string; value: string; unit?: string }[]
+          ).map((tile) => (
+            <div key={tile.label} className="w-[200px]">
               <div
                 className="font-mono text-[oklch(0.62_0.02_30)]"
                 style={{ fontSize: 15, letterSpacing: '0.12em' }}
@@ -138,31 +144,39 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
               </div>
               <div
                 className="font-display mt-3 leading-none text-[oklch(0.945_0.012_60)]"
-                style={{ fontSize: 52 }}
+                style={{ fontSize: 46 }}
               >
                 {tile.value}
+                {tile.unit && (
+                  <span
+                    className="font-mono text-[oklch(0.62_0.02_30)]"
+                    style={{ fontSize: 18, letterSpacing: '0.08em' }}
+                  >
+                    {' '}
+                    {tile.unit}
+                  </span>
+                )}
               </div>
             </div>
           ))}
         </div>
 
         {/* ── Focus bars + heatmap (zone B: y 410..888) ─────────────────── */}
-        <div className="absolute left-[51px] top-[610px] w-[380px]">
+        <div className="absolute left-[51px] top-[596px] w-[380px]">
           <div
             className="font-mono text-[oklch(0.62_0.02_30)]"
             style={{ fontSize: 15, letterSpacing: '0.12em' }}
           >
             FOCUS AREAS
           </div>
-          <div className="mt-5 space-y-[18px]">
+          <div className="mt-5">
             {FOCUS_BUCKETS.map((bucket) => {
               const sets = stats.bucketSets[bucket]
-              const share = stats.mappedSets > 0 ? sets / stats.mappedSets : 0
               return (
-                <div key={bucket}>
+                <div key={bucket} className="mb-[14px]">
                   <div className="flex items-baseline justify-between">
                     <span
-                      className="font-display uppercase text-[oklch(0.945_0.012_60)]"
+                      className="font-display uppercase leading-none text-[oklch(0.945_0.012_60)]"
                       style={{ fontSize: 20 }}
                     >
                       {FOCUS_LABELS[bucket]}
@@ -175,7 +189,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
                     </span>
                   </div>
                   <div
-                    className="mt-2 h-[10px] w-full"
+                    className="mt-[6px] h-[8px] w-full"
                     style={{ background: 'oklch(0.26 0.014 25)' }}
                   >
                     <div
@@ -192,12 +206,9 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
           </div>
         </div>
 
-        <div className="absolute right-[51px] top-[600px] flex h-[275px] items-start justify-end gap-6">
-          {(['front', 'back'] as BodySide[]).map((side) => (
-            <div key={side} className="h-full">
-              <BodySilhouette side={side} intensity={heat} />
-            </div>
-          ))}
+        {/* Muscle map — trimmed art is ~square; h 295 keeps it inside zone B. */}
+        <div className="absolute right-[56px] top-[588px] h-[295px] w-[298px]">
+          <MuscleMap intensity={heat} />
         </div>
 
         {/* ── Exercise list (zone C: y 888..1425) ───────────────────────── */}
@@ -277,24 +288,24 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
           </div>
         </div>
 
-        {/* ── Footer (text above baked underlines) ──────────────────────── */}
+        {/* ── Footer (explicit widths — text sits above baked underlines) ── */}
         <div
-          className="absolute left-[45px] top-[1530px] font-mono text-[oklch(0.945_0.012_60)]"
-          style={{ fontSize: 15, letterSpacing: '0.08em', lineHeight: 1.5 }}
+          className="absolute left-[45px] top-[1524px] w-[255px] whitespace-nowrap font-mono text-[oklch(0.945_0.012_60)]"
+          style={{ fontSize: 13, letterSpacing: '0.08em', lineHeight: 1.5 }}
         >
           TRAINED WITH PURPOSE.
           <br />
           ONE REP AT A TIME.
         </div>
         <div
-          className="absolute left-[266px] top-[1548px] font-mono text-[oklch(0.62_0.02_30)]"
-          style={{ fontSize: 13, letterSpacing: '0.1em' }}
+          className="absolute left-[315px] top-[1546px] w-[240px] whitespace-nowrap font-mono text-[oklch(0.62_0.02_30)]"
+          style={{ fontSize: 12, letterSpacing: '0.1em' }}
         >
           {stats.totalSets} SETS · {stats.exerciseCount} EXERCISES
         </div>
         <div
-          className="absolute right-[47px] top-[1548px] text-right font-mono text-[oklch(0.945_0.012_60)]"
-          style={{ fontSize: 15, letterSpacing: '0.1em' }}
+          className="absolute right-[47px] top-[1546px] w-[190px] whitespace-nowrap text-right font-mono text-[oklch(0.945_0.012_60)]"
+          style={{ fontSize: 13, letterSpacing: '0.1em' }}
         >
           MYSORE, INDIA
         </div>

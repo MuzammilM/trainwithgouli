@@ -116,6 +116,9 @@ export default async function ShareDayPage({
     sessionTitle,
     stats,
     entries,
+    // Duration is not tracked yet — hardcoded per product decision until
+    // session timing lands in the check-in flow.
+    durationMin: 58,
   }
 
   return (
