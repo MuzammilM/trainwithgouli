@@ -1,6 +1,7 @@
-const VERSION = '0.14.0'
+const VERSION = '0.15.0'
 
 const VERSION_HISTORY = [
+  { version: '0.15.0', date: '2026-09-27', description: 'Share card: week-streak tile (Mon-start, /5) + Full/Simple card version toggle' },
   { version: '0.14.0', date: '2026-09-27', description: 'Client sex classification (coach-set) + female muscle-map art on the share card' },
   { version: '0.13.1', date: '2026-09-27', description: 'Share card v2: muscle-map art with region tints, layout overlap fixes, DURATION tile (58 min hardcoded)' },
   { version: '0.13.0', date: '2026-09-26', description: 'Daily progress share card — /share/[date] template-art card with stats, muscle heatmap, exercise table, PNG export + Web Share' },
