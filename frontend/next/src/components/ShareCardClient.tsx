@@ -12,6 +12,7 @@ import {
   CARD_W,
   CARD_H,
   type ShareCardProps,
+  type ShareCardVariant,
 } from '@/components/ShareCard'
 
 type Props = ShareCardProps & {
@@ -34,6 +35,7 @@ export function ShareCardClient(props: Props) {
   const [scale, setScale] = useState(0.3)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [variant, setVariant] = useState<ShareCardVariant>('full')
   // Lazy initializer — runs once on mount, no effect/setState cascade.
   // Guarded for SSR; canShare with an empty file probe can throw on some
   // browsers, hence the try/catch.
@@ -128,8 +130,32 @@ export function ShareCardClient(props: Props) {
           className="absolute left-0 top-0 origin-top-left border-2 border-[var(--border)]"
           style={{ transform: `scale(${scale})` }}
         >
-          <ShareCard ref={captureRef} {...cardProps} />
+          <ShareCard ref={captureRef} variant={variant} {...cardProps} />
         </div>
+      </div>
+
+      {/* Variant toggle — captured PNG uses the active variant */}
+      <div className="flex items-center border-2 border-[var(--border)]" role="group" aria-label="Card version">
+        {(
+          [
+            ['full', 'Full — with exercise list'],
+            ['simple', 'Simple — heatmap focus'],
+          ] as [ShareCardVariant, string][]
+        ).map(([v, label]) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setVariant(v)}
+            aria-pressed={variant === v}
+            className={`px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
+              variant === v
+                ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
+                : 'text-[var(--muted)] hover:text-[var(--accent)]'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3">

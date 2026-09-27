@@ -12,6 +12,11 @@ import {
   applyBucketSets,
   sessionTitleOf,
   formatCardDate,
+  mondayOf,
+  nextIso,
+  localIsoToday,
+  daysWorkedOut,
+  STREAK_TARGET,
 } from '@/lib/share-stats'
 
 type WorkoutDay = {
@@ -129,6 +134,18 @@ export default async function ShareDayPage({
     // Service client unavailable — default to the male art.
   }
 
+  // Weekly streak: distinct local days Mon–Sun (current week) with ≥1 done
+  // exercise, over the 5-day target.
+  const monday = mondayOf(localIsoToday())
+  const weekDays = await pb
+    .collection('workout_days')
+    .getFullList<{ date: string; exercises: unknown }>({
+      filter: `user = "${user.id}" && date >= "${monday} 00:00:00" && date < "${nextIso(monday)} 00:00:00"`,
+      fields: 'date,exercises',
+    })
+    .catch(() => [] as { date: string; exercises: unknown }[])
+  const streak = { done: daysWorkedOut(weekDays), target: STREAK_TARGET }
+
   const cardProps = {
     name: displayName,
     date: formatCardDate(date),
@@ -136,6 +153,7 @@ export default async function ShareDayPage({
     stats,
     entries,
     sex,
+    streak,
     // Duration is not tracked yet — hardcoded per product decision until
     // session timing lands in the check-in flow.
     durationMin: 58,

@@ -2,7 +2,7 @@
  * Pure stat computation for the daily progress share card.
  * No server-only imports — unit-testable, safe in client components.
  */
-import { normalizeEntries, setCountOf, type ExerciseEntry } from '@/lib/exercise'
+import { normalizeEntries, setCountOf, isEntryDone, type ExerciseEntry } from '@/lib/exercise'
 
 /** The five focus buckets shown as bars on the card. */
 export type FocusBucket = 'legs' | 'back' | 'arms' | 'core' | 'conditioning'
@@ -208,4 +208,52 @@ export function sessionTitleOf(stats: ShareStats): string {
   const top = stats.topBuckets.slice(0, 2)
   if (top.length === 0) return 'TRAINING SESSION'
   return top.map((b) => FOCUS_LABELS[b]).join(' / ')
+}
+
+/** Weekly workout target (days per week). */
+export const STREAK_TARGET = 5
+
+/** Monday of the local ISO week containing `iso` (YYYY-MM-DD in, out). */
+export function mondayOf(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number)
+  const dt = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1)
+  const dow = (dt.getDay() + 6) % 7 // Mon=0 … Sun=6
+  dt.setDate(dt.getDate() - dow)
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(
+    dt.getDate(),
+  ).padStart(2, '0')}`
+}
+
+/** Next local ISO day after `iso`. */
+export function nextIso(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number)
+  const dt = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1)
+  dt.setDate(dt.getDate() + 1)
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(
+    dt.getDate(),
+  ).padStart(2, '0')}`
+}
+
+/** Local-timezone ISO date for today (YYYY-MM-DD). */
+export function localIsoToday(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+    now.getDate(),
+  ).padStart(2, '0')}`
+}
+
+/**
+ * Count distinct workout days in a set of raw workout_days records: a date
+ * counts when at least one of its exercises is done.
+ */
+export function daysWorkedOut(
+  days: { date: string; exercises: unknown }[],
+): number {
+  const counted = new Set<string>()
+  for (const day of days) {
+    const iso = String(day.date).slice(0, 10)
+    if (counted.has(iso)) continue
+    if (normalizeEntries(day.exercises).some(isEntryDone)) counted.add(iso)
+  }
+  return counted.size
 }

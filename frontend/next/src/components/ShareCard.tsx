@@ -24,6 +24,10 @@ import type { ExerciseEntry } from '@/lib/exercise'
 export const CARD_W = 941
 export const CARD_H = 1672
 
+/** Card layout variant. 'simple' drops the exercise list and makes the
+ *  heatmap the centered centerpiece. */
+export type ShareCardVariant = 'full' | 'simple'
+
 export type ShareCardProps = {
   /** Athlete display name (uppercased by the card). */
   name: string
@@ -40,6 +44,10 @@ export type ShareCardProps = {
   durationMin: number
   /** Which muscle-map art to tint. */
   sex: MuscleMapVariant
+  /** Weekly streak: distinct workout days Mon–Sun over the target. */
+  streak: { done: number; target: number }
+  /** Layout variant — see ShareCardVariant. */
+  variant?: ShareCardVariant
 }
 
 /** Region intensity per heatmap region, from bucket intensity. */
@@ -61,10 +69,41 @@ function tableRows(entries: ExerciseEntry[]): {
   return { rows: entries.slice(0, MAX), hidden: entries.length - MAX }
 }
 
+/** Muscle map position/size per card variant (keeps the art's aspect). */
+function MuscleMapPlacement({
+  simple,
+  sex,
+  intensity,
+}: {
+  simple: boolean
+  sex: MuscleMapVariant
+  intensity: Record<HeatRegion, number>
+}) {
+  if (simple) {
+    const h = 520
+    const w = Math.round(h * (sex === 'female' ? 1136 / 1151 : 1153 / 1143))
+    const left = Math.round((CARD_W - w) / 2)
+    return (
+      <div className="absolute" style={{ left, top: 580, width: w, height: h }}>
+        <MuscleMap variant={sex} intensity={intensity} />
+      </div>
+    )
+  }
+  return (
+    <div className="absolute right-[56px] top-[588px] h-[295px] w-[298px]">
+      <MuscleMap variant={sex} intensity={intensity} />
+    </div>
+  )
+}
+
 export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
-  function ShareCard({ name, date, sessionTitle, stats, entries, durationMin, sex }, ref) {
+  function ShareCard(
+    { name, date, sessionTitle, stats, entries, durationMin, sex, streak, variant = 'full' },
+    ref,
+  ) {
     const { rows, hidden } = tableRows(entries)
     const heat = regionIntensity(stats)
+    const simple = variant === 'simple'
     const maxBucketSets = Math.max(
       1,
       ...FOCUS_BUCKETS.map((b) => stats.bucketSets[b]),
@@ -132,12 +171,11 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
           {(
             [
               { label: 'EXERCISES', value: String(stats.exerciseCount) },
-              { label: 'WORKING SETS', value: String(stats.totalSets) },
-              { label: 'TOTAL REPS', value: String(stats.totalReps) },
+              { label: 'WEEK STREAK', value: `${streak.done}/${streak.target}` },
               { label: 'DURATION', value: String(durationMin), unit: 'MIN' },
             ] as { label: string; value: string; unit?: string }[]
           ).map((tile) => (
-            <div key={tile.label} className="w-[200px]">
+            <div key={tile.label} className="w-[250px]">
               <div
                 className="font-mono text-[oklch(0.62_0.02_30)]"
                 style={{ fontSize: 15, letterSpacing: '0.12em' }}
@@ -163,8 +201,13 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
           ))}
         </div>
 
-        {/* ── Focus bars + heatmap (zone B: y 410..888) ─────────────────── */}
-        <div className="absolute left-[51px] top-[596px] w-[380px]">
+        {/* ── Focus bars + heatmap ─────────────────────────────────────────
+            full:  bars y596 left col; map 295px right side (zone B)
+            simple: map ~520px centered (y580–1100); bars bottom-left (zone C) */}
+        <div
+          className="absolute left-[51px] w-[380px]"
+          style={{ top: simple ? 1140 : 596 }}
+        >
           <div
             className="font-mono text-[oklch(0.62_0.02_30)]"
             style={{ fontSize: 15, letterSpacing: '0.12em' }}
@@ -208,12 +251,12 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
           </div>
         </div>
 
-        {/* Muscle map — trimmed art is ~square; h 295 keeps it inside zone B. */}
-        <div className="absolute right-[56px] top-[588px] h-[295px] w-[298px]">
-          <MuscleMap variant={sex} intensity={heat} />
-        </div>
+        {/* Muscle map — size/position per variant; container keeps the art's
+            aspect so the figures never distort. */}
+        <MuscleMapPlacement simple={simple} sex={sex} intensity={heat} />
 
-        {/* ── Exercise list (zone C: y 888..1425) ───────────────────────── */}
+        {/* ── Exercise list (zone C: y 888..1425; full variant only) ────── */}
+        {!simple && (
         <div className="absolute left-[51px] top-[905px] w-[840px]">
           <div
             className="font-display uppercase leading-none text-[oklch(0.945_0.012_60)]"
@@ -289,6 +332,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
             )}
           </div>
         </div>
+        )}
 
         {/* ── Footer (explicit widths — text sits above baked underlines) ── */}
         <div
