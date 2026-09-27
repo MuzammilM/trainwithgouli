@@ -15,6 +15,14 @@ export type AddClientResult =
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const ALIAS_MAX = 40
 
+export type ClientSex = 'male' | 'female'
+
+/** Validate the sex form field; null when unset (optional at add time). */
+function sexOf(raw: FormDataEntryValue | null): ClientSex | null {
+  const v = String(raw || '').trim().toLowerCase()
+  return v === 'male' || v === 'female' ? v : null
+}
+
 // Trim + collapse internal whitespace; hard-cap at 40 (matches users.alias).
 function sanitizeAlias(raw: string): string {
   return raw.replace(/\s+/g, ' ').trim().slice(0, ALIAS_MAX)
@@ -29,6 +37,7 @@ export async function addClient(formData: FormData): Promise<AddClientResult> {
   const email = String(formData.get('email') || '').trim().toLowerCase()
   const sheetUrl = String(formData.get('sheet_url') || '').trim()
   const alias = sanitizeAlias(String(formData.get('alias') || ''))
+  const sex = sexOf(formData.get('sex'))
 
   if (!EMAIL_RE.test(email)) return { ok: false, code: 'invalid-email' }
   if (!sheetUrl) return { ok: false, code: 'invalid-sheet-url' }
@@ -89,10 +98,28 @@ export async function addClient(formData: FormData): Promise<AddClientResult> {
     sheet_id: access.sheetId,
     sheet_verified: true,
     verified_at: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    ...(sex ? { sex } : {}),
   })
 
   revalidatePath('/clients')
   return { ok: true, account }
+}
+
+/** Coach-set sex classification on an existing client record. */
+export async function setClientSex(
+  id: string,
+  sex: ClientSex,
+): Promise<{ ok: boolean }> {
+  const user = await getAuthUser()
+  if (!user || user.role !== 'coach') return { ok: false }
+
+  const pb = await serverClient()
+  const client = await pb.collection('clients').getOne(id)
+  if (client.coach !== user.id) return { ok: false }
+
+  await pb.collection('clients').update(id, { sex })
+  revalidatePath('/clients')
+  return { ok: true }
 }
 
 export async function removeClient(id: string): Promise<void> {

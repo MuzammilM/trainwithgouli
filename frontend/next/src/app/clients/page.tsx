@@ -5,6 +5,7 @@ import { serviceClient } from '@/lib/pocketbase/admin'
 import { Nav } from '@/components/Nav'
 import { AddClientForm } from '@/components/AddClientForm'
 import { removeClient } from '@/lib/actions/clients'
+import { ClientSexControl } from '@/components/ClientSexControl'
 import { ImportHistoryButton } from '@/components/ImportHistoryButton'
 
 type ClientRecord = {
@@ -16,6 +17,7 @@ type ClientRecord = {
   sheet_verified: boolean
   verified_at: string
   created: string
+  sex: 'male' | 'female' | ''
 }
 
 export const metadata = { title: 'Clients' }
@@ -77,6 +79,7 @@ export default async function ClientsPage() {
                       <span className="font-mono text-xs text-[var(--muted)]">{detail}</span>
                     ) : null}
                   </div>
+                  <ClientSexControl clientId={client.id} sex={client.sex} />
                 <a
                   href={client.sheet_url}
                   target="_blank"
