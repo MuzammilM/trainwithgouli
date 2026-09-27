@@ -1,0 +1,190 @@
+{
+  "email": "madebymzm@gmail.com",
+  "year": 2026,
+  "days": [
+    {
+      "date": "2026-08-06",
+      "rows": [
+        { "name": "Mobility", "weight": "", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Crunches", "weight": "5kg", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "5kg", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Hanging knee tucks", "weight": "", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Landmine", "weight": "5kg", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Bear hold shoulder tap", "weight": "", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "High plank row", "weight": "", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Back extension", "weight": "", "reps": "10-15", "sets": "4", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-08-08",
+      "rows": [
+        { "name": "Switch lunges", "weight": "5kg", "reps": "10/10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg curl", "weight": "25kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Pull-ups", "weight": "", "reps": "5", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Triceps pulldown", "weight": "10kg", "reps": "", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Hammer curl", "weight": "10kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Calf raise", "weight": "12.5kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-08-14",
+      "rows": [
+        { "name": "Barbell shoulder press", "weight": "5kg each side", "reps": "8", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Lateral raise + front raise", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Barbell row", "weight": "5kg each side", "reps": "8", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Deadlift", "weight": "15kg (yellow plate)", "reps": "5", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Shrugs", "weight": "12.5kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Skullcrusher", "weight": "10kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-08-20",
+      "rows": [
+        { "name": "Single leg squat", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Calf raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Toe raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Ball throw", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Shoulder press", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Barbell row", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Incline press", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Pull-ups", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Ball rotation", "weight": "", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Landmine", "weight": "5kg", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Clean and press", "weight": "5kg", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Dips", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Plank shoulder tap", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Side plank", "weight": "", "reps": "40 sec", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-08-24",
+      "rows": [
+        { "name": "Single leg squat", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Leg extension", "weight": "", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell bench press", "weight": "10kg", "reps": "8", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell flys", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dips", "weight": "", "reps": "20", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Single calf raise", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-08-27",
+      "rows": [
+        { "name": "Leg press", "weight": "40kg", "reps": "8", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Lunges", "weight": "5kg", "reps": "10/10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg curl", "weight": "25kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Pull-ups", "weight": "", "reps": "5", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Cable row", "weight": "10kg", "reps": "", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Triceps pulldown", "weight": "10kg", "reps": "", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Hammer curl", "weight": "10kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Calf raise", "weight": "12.5kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "rows": [
+        { "name": "Ball pass", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Shoulder press", "weight": "25kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Front raise", "weight": "5kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Single-arm lateral raise", "weight": "5kg", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Incline press", "weight": "7.5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Overhead extension", "weight": "10kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Shrugs", "weight": "15kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-02",
+      "rows": [
+        { "name": "Single leg squat", "weight": "2.5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg extension", "weight": "", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell bench press", "weight": "10kg", "reps": "10", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell flys", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dips", "weight": "", "reps": "20", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Bear hold shoulder tap", "weight": "", "reps": "30 sec", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Single calf raise", "weight": "5kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-03",
+      "rows": [
+        { "name": "Ball pass", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Shoulder press", "weight": "25kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Front raise", "weight": "5kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Single-arm lateral raise", "weight": "5kg", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Incline press", "weight": "7.5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Pec fly", "weight": "7.5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Overhead extension", "weight": "10kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Shrugs", "weight": "15kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-05",
+      "rows": [
+        { "name": "Single leg squat", "weight": "2.5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg extension", "weight": "", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell bench press", "weight": "10kg", "reps": "10", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell flys", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dips", "weight": "", "reps": "20", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-07",
+      "rows": [
+        { "name": "Leg press", "weight": "40kg", "reps": "8", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Leg curl", "weight": "25kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Pull-ups", "weight": "", "reps": "5", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Lat pulldown (close grip)", "weight": "25kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Cable row", "weight": "10kg", "reps": "", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Triceps pulldown", "weight": "15kg", "reps": "", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Hammer curl", "weight": "10kg", "reps": "12", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Calf raise", "weight": "12.5kg", "reps": "15", "sets": "4", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-09",
+      "rows": [
+        { "name": "Romanian deadlift", "weight": "10kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Deadlift", "weight": "30kg", "reps": "6", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell bench press", "weight": "10kg", "reps": "10", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Push-ups", "weight": "", "reps": "10", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell flys", "weight": "5kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dips", "weight": "", "reps": "20", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Crunches", "weight": "", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-15",
+      "rows": [
+        { "name": "Leg press", "weight": "50kg", "reps": "10", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Leg curl", "weight": "25kg", "reps": "10", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Pull-ups", "weight": "", "reps": "5", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Lat pulldown (close grip)", "weight": "25kg", "reps": "15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Cable row", "weight": "12kg", "reps": "", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Triceps pulldown", "weight": "15kg", "reps": "", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Hammer curl", "weight": "10kg", "reps": "12", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Calf raise", "weight": "12.5kg", "reps": "15", "sets": "4", "rest": "", "coach_notes": "" },
+        { "name": "Leg raise", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" },
+        { "name": "Knee tucks", "weight": "", "reps": "", "sets": "", "rest": "", "coach_notes": "" }
+      ]
+    },
+    {
+      "date": "2026-09-19",
+      "replace": true,
+      "rows": [
+        { "name": "Romanian deadlift", "weight": "10kg", "reps": "15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Deadlift", "weight": "30kg", "reps": "8", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Dumbbell step-up", "weight": "7.5kg", "reps": "15/15", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Weighted bridge", "weight": "15kg", "reps": "20", "sets": "3", "rest": "", "coach_notes": "" },
+        { "name": "Wall sit", "weight": "", "reps": "40 sec", "sets": "3", "rest": "", "coach_notes": "Core circuit x3" },
+        { "name": "High plank", "weight": "", "reps": "40 sec", "sets": "3", "rest": "", "coach_notes": "Core circuit x3" },
+        { "name": "Crunches", "weight": "", "reps": "15", "sets": "3", "rest": "", "coach_notes": "Core circuit x3" },
+        { "name": "Leg raise", "weight": "", "reps": "15", "sets": "3", "rest": "", "coach_notes": "Core circuit x3" }
+      ]
+    }
+  ]
+}

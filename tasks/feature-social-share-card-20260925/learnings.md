@@ -48,3 +48,15 @@ node_modules never got the new deps → `next build` on main failed with
 module-not-found for `modern-screenshot` + `@dnd-kit`. After merging any branch
 that adds dependencies, run `npm install` in the MAIN checkout before building
 locally. Docker builds are unaffected (clean context).
+
+## 8. PocketBase field creation via API — field `id` must be type-prefixed
+Adding a select field with id "sex123..." → 400 "invalid formatting"; id
+"select123..." → 200. Mirror the existing field-id convention (type + digits)
+when appending fields via PATCH /api/collections/{id} {fields:[...]}. Also:
+this PB version uses `fields` (not `schema`) on collections, and record PATCHes
+behaved reliably only with raw fetch + explicit Content-Type header.
+
+## 9. Sex-aware share card data path
+clients collection listRule is coach-only — clients cannot read their own
+clients record. Server pages must resolve sex via serviceClient() by email
+match (share/[date]/page.tsx pattern). Unset → male art fallback.
