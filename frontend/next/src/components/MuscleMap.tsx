@@ -1,23 +1,26 @@
 /**
- * Muscle heatmap for the share card: the committed muscle-map line art
+ * Muscle heatmap for the share card: committed muscle-map line art
  * (transparent background) with red region tints drawn on top — one polygon
  * group per HeatRegion, fill opacity proportional to that bucket's intensity.
  *
- * Polygon coordinates are in the trimmed art's pixel space (1153×1143),
- * hand-mapped against a coordinate grid. Preview composites live in
- * tasks/feature-social-share-card-20260925/ (muscle-map-preview2.png).
+ * Two variants share the same HeatRegion keys; polygon coordinates are in
+ * each art's trimmed pixel space, hand-mapped against a coordinate grid and
+ * verified with offline composite previews (tasks/feature-social-share-card-20260925).
  */
 import Image from 'next/image'
 import type { HeatRegion } from '@/lib/share-stats'
 
-/** viewBox dimensions of the trimmed art. */
-export const MAP_W = 1153
-export const MAP_H = 1143
+export type MuscleMapVariant = 'male' | 'female'
 
 type Poly = [number, number][]
 
-/** Every tinted polygon, tagged with the HeatRegion that drives its intensity. */
-const POLYS: { region: HeatRegion; points: Poly }[] = [
+const MALE_W = 1153
+const MALE_H = 1143
+
+const FEMALE_W = 1136
+const FEMALE_H = 1151
+
+const POLYS_MALE: { region: HeatRegion; points: Poly }[] = [
   // ── Front figure ──────────────────────────────────────────────────────────
   { region: 'traps', points: [[285,152],[335,152],[352,168],[368,190],[330,205],[290,205],[252,190],[268,168]] },
   { region: 'delts', points: [[108,225],[128,200],[168,200],[185,225],[188,255],[172,285],[140,292],[115,272],[103,248]] },
@@ -45,37 +48,75 @@ const POLYS: { region: HeatRegion; points: Poly }[] = [
   { region: 'calves', points: [[1012,852],[942,845],[934,905],[948,985],[982,1000],[1008,960],[1018,905]] },
 ]
 
+const POLYS_FEMALE: { region: HeatRegion; points: Poly }[] = [
+  // ── Front figure ──────────────────────────────────────────────────────────
+  { region: 'traps', points: [[250,190],[325,190],[340,215],[330,245],[285,255],[245,245],[235,215]] },
+  { region: 'delts', points: [[135,255],[160,235],[200,240],[210,270],[205,305],[175,325],[145,310],[130,285]] },
+  { region: 'delts', points: [[435,255],[410,235],[370,240],[360,270],[365,305],[395,325],[425,310],[440,285]] },
+  { region: 'chest', points: [[232,242],[343,242],[335,265],[285,270],[240,265]] },
+  { region: 'biceps', points: [[125,330],[190,322],[195,380],[185,455],[155,470],[130,440],[118,385]] },
+  { region: 'biceps', points: [[445,330],[380,322],[375,380],[385,455],[415,470],[440,440],[452,385]] },
+  { region: 'abs', points: [[242,412],[338,412],[340,460],[335,508],[245,508],[240,460]] },
+  { region: 'quads', points: [[170,650],[275,645],[278,720],[265,790],[220,805],[180,785],[162,720]] },
+  { region: 'quads', points: [[410,650],[305,645],[302,720],[315,790],[360,805],[400,785],[418,720]] },
+  { region: 'calves', points: [[172,845],[258,838],[262,900],[248,985],[205,995],[180,950],[168,900]] },
+  { region: 'calves', points: [[408,845],[322,838],[318,900],[332,985],[375,995],[400,950],[412,900]] },
+  // ── Back figure ───────────────────────────────────────────────────────────
+  { region: 'traps', points: [[788,185],[855,178],[918,185],[930,230],[915,290],[862,315],[805,290],[792,230]] },
+  { region: 'delts', points: [[695,255],[720,235],[760,240],[770,270],[762,308],[732,322],[702,308],[688,282]] },
+  { region: 'delts', points: [[1015,255],[990,235],[950,240],[940,270],[948,308],[978,322],[1008,308],[1022,282]] },
+  { region: 'lats', points: [[745,312],[795,302],[808,330],[798,430],[776,492],[750,478],[735,415],[740,355]] },
+  { region: 'lats', points: [[965,312],[915,302],[902,330],[912,430],[934,492],[960,478],[975,415],[970,355]] },
+  { region: 'triceps', points: [[668,332],[745,322],[750,385],[738,465],[705,478],[678,450],[660,395]] },
+  { region: 'triceps', points: [[1042,332],[965,322],[960,385],[972,465],[1005,478],[1032,450],[1050,395]] },
+  { region: 'hamstrings', points: [[725,662],[820,655],[826,720],[812,800],[768,818],[732,800],[715,730]] },
+  { region: 'hamstrings', points: [[975,662],[880,655],[874,720],[888,800],[932,818],[968,800],[985,730]] },
+  { region: 'calves', points: [[720,848],[805,840],[810,905],[795,990],[752,1005],[725,960],[712,905]] },
+  { region: 'calves', points: [[980,848],[895,840],[890,905],[905,990],[948,1005],[975,960],[988,905]] },
+]
+
+const VARIANTS: Record<
+  MuscleMapVariant,
+  { src: string; w: number; h: number; polys: { region: HeatRegion; points: Poly }[] }
+> = {
+  male: { src: '/share/muscle-map.png', w: MALE_W, h: MALE_H, polys: POLYS_MALE },
+  female: { src: '/share/muscle-map-female.png', w: FEMALE_W, h: FEMALE_H, polys: POLYS_FEMALE },
+}
+
 export function MuscleMap({
+  variant,
   intensity,
 }: {
+  variant: MuscleMapVariant
   /** Per-region intensity 0..1, derived from bucket intensity by the caller. */
   intensity: Record<HeatRegion, number>
 }) {
+  const v = VARIANTS[variant] ?? VARIANTS.male
   return (
     <div className="relative h-full w-full">
       <svg
-        viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+        viewBox={`0 0 ${v.w} ${v.h}`}
         className="absolute inset-0 h-full w-full"
         aria-hidden="true"
       >
-        {POLYS.map((p, i) => {
-          const v = Math.min(1, Math.max(0, intensity[p.region] ?? 0))
-          if (v <= 0) return null
+        {v.polys.map((p, i) => {
+          const iv = Math.min(1, Math.max(0, intensity[p.region] ?? 0))
+          if (iv <= 0) return null
           return (
             <polygon
               key={i}
               points={p.points.map((pt) => pt.join(',')).join(' ')}
               fill="oklch(0.64 0.2 22)"
-              fillOpacity={0.2 + 0.5 * v}
+              fillOpacity={0.2 + 0.5 * iv}
             />
           )
         })}
       </svg>
       <Image
-        src="/share/muscle-map.png"
+        src={v.src}
         alt=""
-        width={MAP_W}
-        height={MAP_H}
+        width={v.w}
+        height={v.h}
         draggable={false}
         className="absolute inset-0 h-full w-full select-none"
       />

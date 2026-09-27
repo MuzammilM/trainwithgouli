@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { serverClient, getAuthUser } from '@/lib/pocketbase/server'
+import { serviceClient } from '@/lib/pocketbase/admin'
 import { Nav } from '@/components/Nav'
 import { ShareCardClient } from '@/components/ShareCardClient'
+import type { MuscleMapVariant } from '@/components/MuscleMap'
 import { normalizeEntries, setCountOf } from '@/lib/exercise'
 import {
   computeShareStats,
@@ -110,12 +112,30 @@ export default async function ShareDayPage({
   const sessionTitle = sessionTitleOf(stats)
   const displayName = user.name.toUpperCase()
 
+  // Sex classification for the muscle-map variant. The clients collection is
+  // coach-readable only, so resolve via the service client; unset → male art.
+  let sex: MuscleMapVariant = 'male'
+  try {
+    const admin = await serviceClient()
+    const client = await admin
+      .collection('clients')
+      .getFirstListItem<{ sex?: string }>(
+        `email = "${user.email.trim().toLowerCase()}"`,
+        { fields: 'sex' },
+      )
+      .catch(() => null)
+    if (client?.sex === 'female') sex = 'female'
+  } catch {
+    // Service client unavailable — default to the male art.
+  }
+
   const cardProps = {
     name: displayName,
     date: formatCardDate(date),
     sessionTitle,
     stats,
     entries,
+    sex,
     // Duration is not tracked yet — hardcoded per product decision until
     // session timing lands in the check-in flow.
     durationMin: 58,

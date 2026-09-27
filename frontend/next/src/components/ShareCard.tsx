@@ -8,7 +8,7 @@
  */
 import { forwardRef } from 'react'
 import Image from 'next/image'
-import { MuscleMap } from '@/components/MuscleMap'
+import { MuscleMap, type MuscleMapVariant } from '@/components/MuscleMap'
 import {
   FOCUS_BUCKETS,
   FOCUS_LABELS,
@@ -38,6 +38,8 @@ export type ShareCardProps = {
    * session timing (rendered as the DURATION tile).
    */
   durationMin: number
+  /** Which muscle-map art to tint. */
+  sex: MuscleMapVariant
 }
 
 /** Region intensity per heatmap region, from bucket intensity. */
@@ -60,7 +62,7 @@ function tableRows(entries: ExerciseEntry[]): {
 }
 
 export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
-  function ShareCard({ name, date, sessionTitle, stats, entries, durationMin }, ref) {
+  function ShareCard({ name, date, sessionTitle, stats, entries, durationMin, sex }, ref) {
     const { rows, hidden } = tableRows(entries)
     const heat = regionIntensity(stats)
     const maxBucketSets = Math.max(
@@ -208,7 +210,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
 
         {/* Muscle map — trimmed art is ~square; h 295 keeps it inside zone B. */}
         <div className="absolute right-[56px] top-[588px] h-[295px] w-[298px]">
-          <MuscleMap intensity={heat} />
+          <MuscleMap variant={sex} intensity={heat} />
         </div>
 
         {/* ── Exercise list (zone C: y 888..1425) ───────────────────────── */}
