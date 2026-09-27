@@ -84,9 +84,17 @@ function MuscleMapPlacement({
     const w = Math.round(h * (sex === 'female' ? 1136 / 1151 : 1153 / 1143))
     const left = Math.round((CARD_W - w) / 2)
     return (
-      <div className="absolute" style={{ left, top: 580, width: w, height: h }}>
-        <MuscleMap variant={sex} intensity={intensity} />
-      </div>
+      <>
+        {/* The template's baked zone divider (y=888) would cut through the
+            oversized map — cover it across the map's span with the card bg. */}
+        <div
+          className="absolute"
+          style={{ left: left - 6, top: 878, width: w + 12, height: 20, background: 'oklch(0.145 0.012 25)' }}
+        />
+        <div className="absolute" style={{ left, top: 580, width: w, height: h }}>
+          <MuscleMap variant={sex} intensity={intensity} />
+        </div>
+      </>
     )
   }
   return (
@@ -203,11 +211,9 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
 
         {/* ── Focus bars + heatmap ─────────────────────────────────────────
             full:  bars y596 left col; map 295px right side (zone B)
-            simple: map ~520px centered (y580–1100); bars bottom-left (zone C) */}
-        <div
-          className="absolute left-[51px] w-[380px]"
-          style={{ top: simple ? 1140 : 596 }}
-        >
+            simple: map ~520px centered (y580–1100); no focus bars */}
+        {!simple && (
+        <div className="absolute left-[51px] top-[596px] w-[380px]">
           <div
             className="font-mono text-[oklch(0.62_0.02_30)]"
             style={{ fontSize: 15, letterSpacing: '0.12em' }}
@@ -250,6 +256,7 @@ export const ShareCard = forwardRef<HTMLDivElement, ShareCardProps>(
             })}
           </div>
         </div>
+        )}
 
         {/* Muscle map — size/position per variant; container keeps the art's
             aspect so the figures never distort. */}
