@@ -41,3 +41,10 @@ Tools not exposed in the function catalog this session. Mirror task context to
 redirect() in an async server page returns HTTP 200 + NEXT_REDIRECT RSC instruction for
 document GETs (client performs navigation), NOT a 307. Verify auth gating by grepping the
 HTML for NEXT_REDIRECT, not by status code.
+
+## 7. Main-repo node_modules goes stale after worktree merges
+A worktree branch ran `npm install` and committed package.json/lock; main's own
+node_modules never got the new deps → `next build` on main failed with
+module-not-found for `modern-screenshot` + `@dnd-kit`. After merging any branch
+that adds dependencies, run `npm install` in the MAIN checkout before building
+locally. Docker builds are unaffected (clean context).
